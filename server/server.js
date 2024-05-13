@@ -1,3 +1,5 @@
+import { Axios } from 'axios';
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -21,4 +23,9 @@ app.listen(PORT, () => {
 const getAllEvents = async () => {
   const res = await pool.query('SELECT * FROM events');
   return res.rows;
+};
+
+const fetchEvents = async () => {
+  const response = await axios.get('http://localhost:3000/events');
+  console.log(response.data);
 };
