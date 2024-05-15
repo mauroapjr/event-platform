@@ -1,24 +1,23 @@
-import { Axios } from 'axios';
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import pg from 'pg'; 
+import axios from 'axios';
 
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-
-const { Pool } = require('pg');
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
-});
-
+const { Pool } = pg; 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(cors());
 
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
 
 const getAllEvents = async () => {
   const res = await pool.query('SELECT * FROM events');
