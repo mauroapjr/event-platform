@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, Badge } from "react-bootstrap";
 const events = [
   { name: "FESURFING JUNIOR AIR SHOW 2024", status: "LIVE" },
   { name: "Maresias Shootout 2024", status: "LIVE" },
-  { name: "2024 NSSA WEST COAST CHAMPIONSHIPS", status: "LIVE" },
+  { name: "2024 Infratores da Divisa Contest", status: "LIVE" },
 ];
 
 export default function EventList() {

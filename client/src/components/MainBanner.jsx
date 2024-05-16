@@ -1,6 +1,6 @@
 import React from "react";
 import { Container, Button, Form } from "react-bootstrap";
-import "./MainBanner"; 
+import "./MainBanner";
 
 export default function MainBanner() {
   return (
@@ -14,18 +14,19 @@ export default function MainBanner() {
             size="lg"
           />
           <h1 className="display-4">
-            The all-in-one platform for modern sports competitions
+            Sua plataforma completa para competições!
           </h1>
           <p>
-            Bateria ao vivo helps organisers run sophisticated competitions with
-            minimal effort
+            Bateria ao vivo cria e administra campeonatos, mostrando em tempo
+            real notas e classificações de juízes e baterias de forma fácil e
+            intuitiva
           </p>
           <div className="d-flex justify-content-center">
             <Button variant="primary" className="me-3" size="lg">
-              Create organisation account
+              Crie seu Campeonato
             </Button>
             <Button variant="warning" size="lg">
-              Find an event or organisation
+              Encontre seu Campeonato
             </Button>
           </div>
         </Container>

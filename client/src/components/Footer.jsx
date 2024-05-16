@@ -9,26 +9,26 @@ export default function Footer() {
         <Container>
           <Row>
             <Col md={4}>
-              <h5>Contact Us</h5>
+              <h5>Fale conosco:</h5>
               <Form>
                 <Form.Group className="mb-3" controlId="formName">
-                  <Form.Label>Name</Form.Label>
-                  <Form.Control type="text" placeholder="Enter your name" />
+                  <Form.Label>Nome</Form.Label>
+                  <Form.Control type="text" placeholder="Seu nome" />
                 </Form.Group>
                 <Form.Group className="mb-3" controlId="formEmail">
-                  <Form.Label>Email address</Form.Label>
-                  <Form.Control type="email" placeholder="Enter your email" />
+                  <Form.Label>Email</Form.Label>
+                  <Form.Control type="email" placeholder="Seu email" />
                 </Form.Group>
                 <Form.Group className="mb-3" controlId="formMessage">
-                  <Form.Label>Message</Form.Label>
+                  <Form.Label>Mensagem</Form.Label>
                   <Form.Control
                     as="textarea"
                     rows={3}
-                    placeholder="Your message"
+                    placeholder="Sua mensagem"
                   />
                 </Form.Group>
                 <Button variant="primary" type="submit">
-                  Submit
+                  Enviar
                 </Button>
               </Form>
             </Col>
@@ -47,11 +47,12 @@ export default function Footer() {
               </div>
             </Col>
             <Col md={4}>
-              <h5>About Us</h5>
+              <h5>Sobre nós</h5>
               <p>
-                Bateria ao vivo is the all-in-one platform for modern sports
-                competitions. We help organizers run sophisticated competitions
-                with minimal effort.
+                Bateria ao vivo é uma plataforma feita para surfistas por
+                surfistas. Nos dedicamos a conectar apaixonados pelo surf, desde
+                fãs ávidos que nunca perdem uma competição, até aqueles que
+                gostam de acompanhar os eventos ocasionalmente.          
               </p>
             </Col>
           </Row>
