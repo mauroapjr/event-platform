@@ -1,5 +1,5 @@
 .main-banner {
-  background: url('.../public/images/Storm.jpg') no-repeat center center;
+  background: url('../public/images/Storm.jpg') no-repeat center center;
   background-size: cover;
   height: 60vh;
   color: white;

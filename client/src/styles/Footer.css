@@ -1,0 +1,15 @@
+.footer {
+  background-color: #343a40;
+  color: #fff;
+}
+
+.footer .social-links a {
+  display: inline-block;
+  margin-right: 15px;
+  color: #fff;
+  text-decoration: none;
+}
+
+.footer .social-links a:hover {
+  color: #adb5bd;
+}
