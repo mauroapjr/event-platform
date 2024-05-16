@@ -1,6 +1,6 @@
 import React from "react";
 import { Container, Button, Form } from "react-bootstrap";
-import "./MainBanner.css"; 
+import "./MainBanner"; 
 
 export default function MainBanner() {
   return (
@@ -17,7 +17,7 @@ export default function MainBanner() {
             The all-in-one platform for modern sports competitions
           </h1>
           <p>
-            LiveHeats helps organisers run sophisticated competitions with
+            Bateria ao vivo helps organisers run sophisticated competitions with
             minimal effort
           </p>
           <div className="d-flex justify-content-center">

@@ -1,0 +1,18 @@
+.main-banner {
+  background: url('.../public/images/Storm.jpg') no-repeat center center;
+  background-size: cover;
+  height: 60vh;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.main-banner .btn-primary {
+  background-color: blue;
+}
+
+.main-banner .btn-warning {
+  background-color: orange;
+}
