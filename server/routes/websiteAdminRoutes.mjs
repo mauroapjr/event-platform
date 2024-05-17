@@ -32,7 +32,7 @@ router.delete('/delete-event-admin/:id', async (req, res) => {
   }
 });
 
-// Edit Event Admin (optional, if you need to update details)
+// Edit Event Admin 
 router.put('/edit-event-admin/:id', async (req, res) => {
   const { id } = req.params;
   const { username, password } = req.body;

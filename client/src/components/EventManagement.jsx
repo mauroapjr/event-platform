@@ -7,8 +7,8 @@ const EventManagement = () => {
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
-  const [createdBy, setCreatedBy] = useState(1);  // This should be dynamic
-
+  const [createdBy, setCreatedBy] = useState(1);  
+  
   useEffect(() => {
     fetchEvents();
   }, []);
