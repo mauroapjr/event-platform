@@ -1,15 +1,13 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import AdminManagement from './AdminManagement';
 
 const AdminDashboard = () => {
   return (
     <div className="container mt-5">
-      <div className="row">
-        <div className="col-12">
-          <h2>Admin Dashboard</h2>
-          <p>admin dashboard!</p>          
-        </div>
-      </div>
+      <h2>Admin Dashboard</h2>
+      <p>Welcome to the admin dashboard!</p>      
+      <AdminManagement />
     </div>
   );
 };

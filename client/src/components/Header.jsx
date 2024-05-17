@@ -1,5 +1,6 @@
 import React from "react";
 import { Navbar, Nav, NavDropdown, Container } from "react-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
 
 export default function Header() {
   return (
@@ -10,17 +11,21 @@ export default function Header() {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
-              <Nav.Link href="#find-event">Eventos ao vivo</Nav.Link>
-              <Nav.Link href="#for-orgs">Eventos passados </Nav.Link>
+              <LinkContainer to="/find-event">
+                <Nav.Link>Eventos ao vivo</Nav.Link>
+              </LinkContainer>
+              <LinkContainer to="/for-orgs">
+                <Nav.Link>Eventos passados</Nav.Link>
+              </LinkContainer>
             </Nav>
             <Nav>
               <NavDropdown title="Login" id="basic-nav-dropdown">
-                <NavDropdown.Item href="#login-judges">
-                  Login para Juízes
-                </NavDropdown.Item>
-                <NavDropdown.Item href="#login-admin">
-                  Login para Admin
-                </NavDropdown.Item>
+                <LinkContainer to="/login-judges">
+                  <NavDropdown.Item>Login para Juízes</NavDropdown.Item>
+                </LinkContainer>
+                <LinkContainer to="/admin/login">
+                  <NavDropdown.Item>Login para Admin</NavDropdown.Item>
+                </LinkContainer>
               </NavDropdown>
             </Nav>
           </Navbar.Collapse>

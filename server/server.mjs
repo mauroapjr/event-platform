@@ -42,7 +42,7 @@ import axios from 'axios';
 
 import pool from './db.mjs';
 import judgeRoutes from './routes/judgeRoutes.mjs';
-import adminRoutes from './routes/adminRoutes.mjs';
+import adminRoutes from './routes/eventAdminRoutes.mjs';
 
 const app = express();
 const PORT = process.env.PORT || 3000;  // Use a different port to avoid conflict with client

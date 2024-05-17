@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./AdminLogin.css"; // Custom styles if needed
+import "../styles/AdminLogin.css"; 
 
 const AdminLogin = () => {
   const [username, setUsername] = useState("");
@@ -17,9 +17,9 @@ const AdminLogin = () => {
         password,
       });
       if (response.status === 200) {
-        // Save token or user info if necessary
+        
         alert("Login successful");
-        navigate("/admin/dashboard"); // Redirect to admin dashboard
+        navigate("/admin/dashboard"); 
       }
     } catch (error) {
       console.error("Login error:", error);
