@@ -20,6 +20,16 @@ router.post('/create-event-admin', async (req, res) => {
   }
 });
 
+// Get all Event Admins
+router.get('/get-event-admins', async (req, res) => {
+  try {
+    const eventAdmins = await pool.query('SELECT id, username FROM users WHERE role = $1', ['event_admin']);
+    res.status(200).json(eventAdmins.rows);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
 // Delete Event Admin
 router.delete('/delete-event-admin/:id', async (req, res) => {
   const { id } = req.params;

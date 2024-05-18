@@ -12,8 +12,13 @@ const EventAdminManagement = () => {
   }, []);
 
   const fetchAdmins = async () => {
-    const response = await axios.get('http://localhost:3000/admin/get-event-admins');
-    setAdmins(response.data);
+    try {
+      const response = await axios.get('http://localhost:3000/website-admin/get-event-admins');
+      setAdmins(response.data);
+    } catch (error) {
+      console.error('Error fetching Event Admins:', error);
+      alert('Error fetching Event Admins');
+    }
   };
 
   const handleCreateAdmin = async (e) => {
