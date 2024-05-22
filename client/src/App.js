@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from './HomePage';
 import AdminLogin from './components/AdminLogin';
+import JudgeLogin from "./components/JudgeLogin";
 import AdminDashboard from './components/AdminDashboard';
 import EventAdminManagement from './components/EventAdminManagement';
 import EventManagement from './components/EventManagement';
@@ -19,7 +20,8 @@ const App = () => {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/manage-event-admins" element={<EventAdminManagement />} />
           <Route path="/event-admin/manage-events" element={<EventManagement />} />
-          <Route path="/judge/manage-scores" element={<ScoreManagement />} />
+          <Route path="/judge/login" element={<JudgeLogin />} />
+          <Route path="/judge/score-management" element={<ScoreManagement />} />
         </Routes>
       </div>
     </Router>

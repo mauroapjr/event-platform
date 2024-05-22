@@ -20,7 +20,7 @@ export default function Header() {
             </Nav>
             <Nav>
               <NavDropdown title="Login" id="basic-nav-dropdown">
-                <LinkContainer to="/login-judges">
+                <LinkContainer to="/judge/login">
                   <NavDropdown.Item>Login para Juízes</NavDropdown.Item>
                 </LinkContainer>
                 <LinkContainer to="/admin/login">

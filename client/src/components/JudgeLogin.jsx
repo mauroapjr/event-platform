@@ -18,7 +18,7 @@ const JudgeLogin = () => {
       });
       if (response.status === 200) {
         alert("Login successful");
-        navigate("/judge/dashboard"); 
+        navigate("/judge/score-management"); 
       }
     } catch (error) {
       console.error("Login error:", error);
