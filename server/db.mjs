@@ -2,11 +2,11 @@ import pkg from 'pg';
 const { Pool } = pkg;
 
 const pool = new Pool({
-  user: 'event_admin',
+  user: 'postgres',
   host: 'localhost',
   database: 'event_platform',
-  password: 'your_password',
-  port: 3002,
+  password: 'password',
+  port: 5432,
 });
 
 export default pool;
