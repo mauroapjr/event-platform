@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import pool from './db.mjs';
 import judgeRoutes from './routes/judgeRoutes.mjs';
-import adminRoutes from './routes/adminRoutes.mjs';
+//import adminRoutes from './routes/adminRoutes.mjs';
 import websiteAdminRoutes from './routes/websiteAdminRoutes.mjs';
 import eventAdminRoutes from './routes/eventAdminRoutes.mjs';
 
@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.use('/judge', judgeRoutes);
-app.use('/admin', adminRoutes);
+//app.use('/admin', adminRoutes);
 app.use('/website-admin', websiteAdminRoutes);
 app.use('/event-admin', eventAdminRoutes);
 

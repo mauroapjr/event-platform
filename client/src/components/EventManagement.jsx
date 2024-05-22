@@ -4,9 +4,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 const EventManagement = () => {
   const [events, setEvents] = useState([]);
+  const [competitors, setCompetitors] = useState([]);
+  const [eventId, setEventId] = useState(null);
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
+  const [competitorName, setCompetitorName] = useState('');
   const [createdBy, setCreatedBy] = useState(1);  
   
   useEffect(() => {
@@ -16,6 +19,12 @@ const EventManagement = () => {
   const fetchEvents = async () => {
     const response = await axios.get('http://localhost:3000/event-admin/get-events');
     setEvents(response.data);
+  };
+
+  const fetchCompetitors = async (eventId) => {
+    const response = await axios.get(`http://localhost:3000/event-admin/get-competitors/${eventId}`);
+    setCompetitors(response.data);
+    setEventId(eventId);
   };
 
   const handleCreateEvent = async (e) => {
@@ -41,6 +50,30 @@ const EventManagement = () => {
     } catch (error) {
       console.error('Error deleting event:', error);
       alert('Error deleting event');
+    }
+  };
+
+  const handleAddCompetitor = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('http://localhost:3000/event-admin/add-competitor', { name: competitorName, event_id: eventId });
+      alert('Competitor added successfully');
+      setCompetitorName('');
+      fetchCompetitors(eventId);
+    } catch (error) {
+      console.error('Error adding competitor:', error);
+      alert('Error adding competitor');
+    }
+  };
+
+  const handleDeleteCompetitor = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3000/event-admin/delete-competitor/${id}`);
+      alert('Competitor deleted successfully');
+      fetchCompetitors(eventId);
+    } catch (error) {
+      console.error('Error deleting competitor:', error);
+      alert('Error deleting competitor');
     }
   };
 
@@ -85,11 +118,40 @@ const EventManagement = () => {
       <ul className="list-group">
         {events.map((event) => (
           <li key={event.id} className="list-group-item d-flex justify-content-between align-items-center">
-            {event.name}
+            <span onClick={() => fetchCompetitors(event.id)}>{event.name}</span>
             <button className="btn btn-danger" onClick={() => handleDeleteEvent(event.id)}>Delete</button>
           </li>
         ))}
       </ul>
+
+      {eventId && (
+        <>
+          <h3>Manage Competitors</h3>
+          <form onSubmit={handleAddCompetitor} className="mb-4">
+            <div className="form-group">
+              <label>Competitor Name:</label>
+              <input
+                type="text"
+                className="form-control"
+                value={competitorName}
+                onChange={(e) => setCompetitorName(e.target.value)}
+                required
+              />
+            </div>
+            <button type="submit" className="btn btn-primary mt-3">Add Competitor</button>
+          </form>
+
+          <h3>Existing Competitors</h3>
+          <ul className="list-group">
+            {competitors.map((competitor) => (
+              <li key={competitor.id} className="list-group-item d-flex justify-content-between align-items-center">
+                {competitor.name}
+                <button className="btn btn-danger" onClick={() => handleDeleteCompetitor(competitor.id)}>Delete</button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 };

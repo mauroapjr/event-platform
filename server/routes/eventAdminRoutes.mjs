@@ -78,6 +78,18 @@ router.delete('/delete-event/:id', async (req, res) => {
 });
 
 // Add Competitor
+router.get('/get-competitors/:eventId', async (req, res) => {
+  const { eventId } = req.params;
+
+  try {
+    const result = await pool.query('SELECT * FROM competitors WHERE event_id = $1', [eventId]);
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error fetching competitors:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 router.post('/add-competitor', async (req, res) => {
   const { name, event_id } = req.body;
 
