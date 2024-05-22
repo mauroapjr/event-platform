@@ -17,7 +17,7 @@ const EventAdminLogin = () => {
       });
       if (response.status === 200) {
         alert("Login successful");
-        navigate("/event-admin/dashboard"); 
+        navigate("/event-admin/manage-events"); 
       }
     } catch (error) {
       console.error("Login error:", error);

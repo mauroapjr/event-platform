@@ -23,8 +23,11 @@ export default function Header() {
                 <LinkContainer to="/judge/login">
                   <NavDropdown.Item>Login para Juízes</NavDropdown.Item>
                 </LinkContainer>
+                <LinkContainer to="/event-admin/login">
+                  <NavDropdown.Item>Login para Admin de Eventos</NavDropdown.Item>
+                </LinkContainer>
                 <LinkContainer to="/admin/login">
-                  <NavDropdown.Item>Login para Admin</NavDropdown.Item>
+                  <NavDropdown.Item>Login para Admin do Site</NavDropdown.Item>
                 </LinkContainer>
               </NavDropdown>
             </Nav>
