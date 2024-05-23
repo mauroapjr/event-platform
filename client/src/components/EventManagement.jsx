@@ -10,8 +10,8 @@ const EventManagement = () => {
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
   const [competitorName, setCompetitorName] = useState('');
-  const [createdBy, setCreatedBy] = useState(1);  
-  
+  const [createdBy, setCreatedBy] = useState(1);
+
   useEffect(() => {
     fetchEvents();
   }, []);
@@ -29,7 +29,7 @@ const EventManagement = () => {
     try {
       const response = await axios.get(`http://localhost:3000/event-admin/get-competitors/${eventId}`);
       setCompetitors(response.data);
-      setEventId(eventId);
+      setEventId(eventId); 
     } catch (error) {
       console.error('Error fetching competitors:', error);
     }
@@ -123,16 +123,25 @@ const EventManagement = () => {
       </form>
 
       <h3>Existing Events</h3>
-      <ul className="list-group">
-        {events.map((event) => (
-          <li key={event.id} className="list-group-item d-flex justify-content-between align-items-center">
-            <span onClick={() => fetchCompetitors(event.id)}>{event.name}</span>
-            <button className="btn btn-danger" onClick={() => handleDeleteEvent(event.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+      {events.length === 0 ? (
+        <p>No events available. Please create an event.</p>
+      ) : (
+        <ul className="list-group">
+          {events.map((event) => (
+            <li
+              key={event.id}
+              className={`list-group-item d-flex justify-content-between align-items-center ${eventId === event.id ? 'active' : ''}`}
+              style={{ cursor: 'pointer' }}
+              onClick={() => fetchCompetitors(event.id)}
+            >
+              {event.name}
+              <button className="btn btn-danger" onClick={() => handleDeleteEvent(event.id)}>Delete</button>
+            </li>
+          ))}
+        </ul>
+      )}
 
-      {eventId && (
+      {eventId ? (
         <>
           <h3>Manage Competitors</h3>
           <form onSubmit={handleAddCompetitor} className="mb-4">
@@ -159,9 +168,12 @@ const EventManagement = () => {
             ))}
           </ul>
         </>
+      ) : (
+        <p className="mt-4">Please select an event to manage competitors.</p>
       )}
     </div>
   );
 };
 
 export default EventManagement;
+
