@@ -5,12 +5,15 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 const EventManagement = () => {
   const [events, setEvents] = useState([]);
   const [competitors, setCompetitors] = useState([]);
+  const [judges, setJudges] = useState([]);
   const [eventId, setEventId] = useState(null);
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
   const [competitorName, setCompetitorName] = useState('');
+  const [judgeName, setJudgeName] = useState('');
   const [createdBy, setCreatedBy] = useState(1);
+  const [selectedEventName, setSelectedEventName] = useState('');
 
   useEffect(() => {
     fetchEvents();
@@ -25,13 +28,23 @@ const EventManagement = () => {
     }
   };
 
-  const fetchCompetitors = async (eventId) => {
+  const fetchCompetitors = async (eventId, eventName) => {
     try {
       const response = await axios.get(`http://localhost:3000/event-admin/get-competitors/${eventId}`);
       setCompetitors(response.data);
-      setEventId(eventId); 
+      setEventId(eventId);
+      setSelectedEventName(eventName);
     } catch (error) {
       console.error('Error fetching competitors:', error);
+    }
+  };
+
+  const fetchJudges = async (eventId) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/event-admin/get-judges/${eventId}`);
+      setJudges(response.data);
+    } catch (error) {
+      console.error('Error fetching judges:', error);
     }
   };
 
@@ -67,7 +80,7 @@ const EventManagement = () => {
       await axios.post('http://localhost:3000/event-admin/add-competitor', { name: competitorName, event_id: eventId });
       alert('Competitor added successfully');
       setCompetitorName('');
-      fetchCompetitors(eventId);
+      fetchCompetitors(eventId, selectedEventName);
     } catch (error) {
       console.error('Error adding competitor:', error);
       alert('Error adding competitor');
@@ -78,10 +91,34 @@ const EventManagement = () => {
     try {
       await axios.delete(`http://localhost:3000/event-admin/delete-competitor/${id}`);
       alert('Competitor deleted successfully');
-      fetchCompetitors(eventId);
+      fetchCompetitors(eventId, selectedEventName);
     } catch (error) {
       console.error('Error deleting competitor:', error);
       alert('Error deleting competitor');
+    }
+  };
+
+  const handleAddJudge = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('http://localhost:3000/event-admin/add-judge', { name: judgeName, event_id: eventId });
+      alert('Judge added successfully');
+      setJudgeName('');
+      fetchJudges(eventId);
+    } catch (error) {
+      console.error('Error adding judge:', error);
+      alert('Error adding judge');
+    }
+  };
+
+  const handleDeleteJudge = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3000/event-admin/delete-judge/${id}`);
+      alert('Judge deleted successfully');
+      fetchJudges(eventId);
+    } catch (error) {
+      console.error('Error deleting judge:', error);
+      alert('Error deleting judge');
     }
   };
 
@@ -132,7 +169,10 @@ const EventManagement = () => {
               key={event.id}
               className={`list-group-item d-flex justify-content-between align-items-center ${eventId === event.id ? 'active' : ''}`}
               style={{ cursor: 'pointer' }}
-              onClick={() => fetchCompetitors(event.id)}
+              onClick={() => {
+                fetchCompetitors(event.id, event.name);
+                fetchJudges(event.id);
+              }}
             >
               {event.name}
               <button className="btn btn-danger" onClick={() => handleDeleteEvent(event.id)}>Delete</button>
@@ -143,7 +183,7 @@ const EventManagement = () => {
 
       {eventId ? (
         <>
-          <h3>Manage Competitors</h3>
+          <h3>Manage Competitors for {selectedEventName}</h3>
           <form onSubmit={handleAddCompetitor} className="mb-4">
             <div className="form-group">
               <label>Competitor Name:</label>
@@ -162,18 +202,42 @@ const EventManagement = () => {
           <ul className="list-group">
             {competitors.map((competitor) => (
               <li key={competitor.id} className="list-group-item d-flex justify-content-between align-items-center">
-                {competitor.name}
+                {competitor.name} (Event: {selectedEventName})
                 <button className="btn btn-danger" onClick={() => handleDeleteCompetitor(competitor.id)}>Delete</button>
+              </li>
+            ))}
+          </ul>
+
+          <h3>Manage Judges for {selectedEventName}</h3>
+          <form onSubmit={handleAddJudge} className="mb-4">
+            <div className="form-group">
+              <label>Judge Name:</label>
+              <input
+                type="text"
+                className="form-control"
+                value={judgeName}
+                onChange={(e) => setJudgeName(e.target.value)}
+                required
+              />
+            </div>
+            <button type="submit" className="btn btn-primary mt-3">Add Judge</button>
+          </form>
+
+          <h3>Existing Judges</h3>
+          <ul className="list-group">
+            {judges.map((judge) => (
+              <li key={judge.id} className="list-group-item d-flex justify-content-between align-items-center">
+                {judge.name} (Event: {selectedEventName})
+                <button className="btn btn-danger" onClick={() => handleDeleteJudge(judge.id)}>Delete</button>
               </li>
             ))}
           </ul>
         </>
       ) : (
-        <p className="mt-4">Please select an event to manage competitors.</p>
+        <p className="mt-4">Please select an event to manage competitors and judges.</p>
       )}
     </div>
   );
 };
 
 export default EventManagement;
-
