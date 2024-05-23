@@ -17,14 +17,22 @@ const EventManagement = () => {
   }, []);
 
   const fetchEvents = async () => {
-    const response = await axios.get('http://localhost:3000/event-admin/get-events');
-    setEvents(response.data);
+    try {
+      const response = await axios.get('http://localhost:3000/event-admin/get-events');
+      setEvents(response.data);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
   };
 
   const fetchCompetitors = async (eventId) => {
-    const response = await axios.get(`http://localhost:3000/event-admin/get-competitors/${eventId}`);
-    setCompetitors(response.data);
-    setEventId(eventId);
+    try {
+      const response = await axios.get(`http://localhost:3000/event-admin/get-competitors/${eventId}`);
+      setCompetitors(response.data);
+      setEventId(eventId);
+    } catch (error) {
+      console.error('Error fetching competitors:', error);
+    }
   };
 
   const handleCreateEvent = async (e) => {
