@@ -2,6 +2,9 @@
 // import axios from 'axios';
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
+// const categories = ['Shortboard', 'Longboard'];
+// const subCategories = ['Women', 'Men', 'Open', 'Sub12', 'Sub14', 'Sub18', 'Professional', '+40', '+50', '+60'];
+
 // const EventManagement = () => {
 //   const [events, setEvents] = useState([]);
 //   const [competitors, setCompetitors] = useState([]);
@@ -11,6 +14,8 @@
 //   const [date, setDate] = useState('');
 //   const [location, setLocation] = useState('');
 //   const [competitorName, setCompetitorName] = useState('');
+//   const [category, setCategory] = useState(categories[0]);
+//   const [subCategory, setSubCategory] = useState(subCategories[0]);
 //   const [judgeName, setJudgeName] = useState('');
 //   const [createdBy, setCreatedBy] = useState(1);
 //   const [selectedEventName, setSelectedEventName] = useState('');
@@ -77,9 +82,11 @@
 //   const handleAddCompetitor = async (e) => {
 //     e.preventDefault();
 //     try {
-//       await axios.post('http://localhost:3000/event-admin/add-competitor', { name: competitorName, event_id: eventId });
+//       await axios.post('http://localhost:3000/event-admin/add-competitor', { name: competitorName, event_id: eventId, category, sub_category: subCategory });
 //       alert('Competitor added successfully');
 //       setCompetitorName('');
+//       setCategory(categories[0]);
+//       setSubCategory(subCategories[0]);
 //       fetchCompetitors(eventId, selectedEventName);
 //     } catch (error) {
 //       console.error('Error adding competitor:', error);
@@ -195,6 +202,32 @@
 //                 required
 //               />
 //             </div>
+//             <div className="form-group mt-3">
+//               <label>Category:</label>
+//               <select
+//                 className="form-control"
+//                 value={category}
+//                 onChange={(e) => setCategory(e.target.value)}
+//                 required
+//               >
+//                 {categories.map((cat) => (
+//                   <option key={cat} value={cat}>{cat}</option>
+//                 ))}
+//               </select>
+//             </div>
+//             <div className="form-group mt-3">
+//               <label>Sub-Category:</label>
+//               <select
+//                 className="form-control"
+//                 value={subCategory}
+//                 onChange={(e) => setSubCategory(e.target.value)}
+//                 required
+//               >
+//                 {subCategories.map((subCat) => (
+//                   <option key={subCat} value={subCat}>{subCat}</option>
+//                 ))}
+//               </select>
+//             </div>
 //             <button type="submit" className="btn btn-primary mt-3">Add Competitor</button>
 //           </form>
 
@@ -202,7 +235,7 @@
 //           <ul className="list-group">
 //             {competitors.map((competitor) => (
 //               <li key={competitor.id} className="list-group-item d-flex justify-content-between align-items-center">
-//                 {competitor.name} (Event: {selectedEventName})
+//                 {competitor.name} (Event: {selectedEventName}, Category: {competitor.category}, Sub-Category: {competitor.sub_category})
 //                 <button className="btn btn-danger" onClick={() => handleDeleteCompetitor(competitor.id)}>Delete</button>
 //               </li>
 //             ))}
@@ -246,9 +279,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const categories = ['Shortboard', 'Longboard'];
-const subCategories = ['Women', 'Men', 'Open', 'Sub12', 'Sub14', 'Sub18', 'Professional', '+40', '+50', '+60'];
-
 const EventManagement = () => {
   const [events, setEvents] = useState([]);
   const [competitors, setCompetitors] = useState([]);
@@ -258,8 +288,11 @@ const EventManagement = () => {
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
   const [competitorName, setCompetitorName] = useState('');
-  const [category, setCategory] = useState(categories[0]);
-  const [subCategory, setSubCategory] = useState(subCategories[0]);
+  const [category, setCategory] = useState('');
+  const [subCategory, setSubCategory] = useState('');
+  const [boardType, setBoardType] = useState('');
+  const [gender, setGender] = useState('');
+  const [ageCategory, setAgeCategory] = useState('');
   const [judgeName, setJudgeName] = useState('');
   const [createdBy, setCreatedBy] = useState(1);
   const [selectedEventName, setSelectedEventName] = useState('');
@@ -326,11 +359,22 @@ const EventManagement = () => {
   const handleAddCompetitor = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3000/event-admin/add-competitor', { name: competitorName, event_id: eventId, category, sub_category: subCategory });
+      await axios.post('http://localhost:3000/event-admin/add-competitor', { 
+        name: competitorName, 
+        event_id: eventId, 
+        category, 
+        sub_category: subCategory, 
+        board_type: boardType, 
+        gender, 
+        age_category: ageCategory
+      });
       alert('Competitor added successfully');
       setCompetitorName('');
-      setCategory(categories[0]);
-      setSubCategory(subCategories[0]);
+      setCategory('');
+      setSubCategory('');
+      setBoardType('');
+      setGender('');
+      setAgeCategory('');
       fetchCompetitors(eventId, selectedEventName);
     } catch (error) {
       console.error('Error adding competitor:', error);
@@ -372,6 +416,10 @@ const EventManagement = () => {
       alert('Error deleting judge');
     }
   };
+
+  const categories = ['Shortboard', 'Longboard'];
+  const subCategories = ['Men', 'Woman'];
+  const ageCategories = ['Open', 'Sub12', 'Sub14', 'Sub18', 'Professional', '+40', '+50', '+60'];
 
   return (
     <div className="container mt-5">
@@ -454,21 +502,65 @@ const EventManagement = () => {
                 onChange={(e) => setCategory(e.target.value)}
                 required
               >
+                <option value="">Select Category</option>
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
             </div>
             <div className="form-group mt-3">
-              <label>Sub-Category:</label>
+              <label>Sub Category:</label>
               <select
                 className="form-control"
                 value={subCategory}
                 onChange={(e) => setSubCategory(e.target.value)}
                 required
               >
+                <option value="">Select Sub Category</option>
                 {subCategories.map((subCat) => (
                   <option key={subCat} value={subCat}>{subCat}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group mt-3">
+              <label>Board Type:</label>
+              <select
+                className="form-control"
+                value={boardType}
+                onChange={(e) => setBoardType(e.target.value)}
+                required
+              >
+                <option value="">Select Board Type</option>
+                {categories.map((type) => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group mt-3">
+              <label>Gender:</label>
+              <select
+                className="form-control"
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                required
+              >
+                <option value="">Select Gender</option>
+                {subCategories.map((g) => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group mt-3">
+              <label>Age Category:</label>
+              <select
+                className="form-control"
+                value={ageCategory}
+                onChange={(e) => setAgeCategory(e.target.value)}
+                required
+              >
+                <option value="">Select Age Category</option>
+                {ageCategories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
             </div>
@@ -479,7 +571,7 @@ const EventManagement = () => {
           <ul className="list-group">
             {competitors.map((competitor) => (
               <li key={competitor.id} className="list-group-item d-flex justify-content-between align-items-center">
-                {competitor.name} (Event: {selectedEventName}, Category: {competitor.category}, Sub-Category: {competitor.sub_category})
+                {competitor.name} (Event: {selectedEventName}, Category: {competitor.category}, Sub Category: {competitor.sub_category}, Board Type: {competitor.board_type}, Gender: {competitor.gender}, Age Category: {competitor.age_category})
                 <button className="btn btn-danger" onClick={() => handleDeleteCompetitor(competitor.id)}>Delete</button>
               </li>
             ))}
@@ -518,3 +610,5 @@ const EventManagement = () => {
 };
 
 export default EventManagement;
+
+
