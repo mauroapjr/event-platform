@@ -87,12 +87,26 @@ router.get('/get-competitors/:eventId', async (req, res) => {
 });
 
 // Add Competitor
+// router.post('/add-competitor', async (req, res) => {
+//   const { name, event_id } = req.body;
+//   try {
+//     const newCompetitor = await pool.query(
+//       'INSERT INTO competitors (name, event_id) VALUES ($1, $2) RETURNING *',
+//       [name, event_id]
+//     );
+//     res.status(201).json(newCompetitor.rows[0]);
+//   } catch (err) {
+//     res.status(500).json({ message: 'Server error', error: err.message });
+//   }
+// });
+
 router.post('/add-competitor', async (req, res) => {
-  const { name, event_id } = req.body;
+  const { name, event_id, category, sub_category } = req.body;
+
   try {
     const newCompetitor = await pool.query(
-      'INSERT INTO competitors (name, event_id) VALUES ($1, $2) RETURNING *',
-      [name, event_id]
+      'INSERT INTO competitors (name, event_id, category, sub_category) VALUES ($1, $2, $3, $4) RETURNING *',
+      [name, event_id, category, sub_category]
     );
     res.status(201).json(newCompetitor.rows[0]);
   } catch (err) {
