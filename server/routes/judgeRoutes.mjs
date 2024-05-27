@@ -18,6 +18,23 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Get Events for a Specific Judge
+router.get('/get-events/:judge_id', async (req, res) => {
+  const { judge_id } = req.params;
+  try {
+      const result = await pool.query(
+          `SELECT e.* FROM events e
+           JOIN judges j ON j.event_id = e.id
+           WHERE j.user_id = $1`,
+          [judge_id]
+      );
+      res.status(200).json(result.rows);
+  } catch (error) {
+      console.error('Error fetching events:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Get competitors
 router.get('/get-competitors', async (req, res) => {
   try {
