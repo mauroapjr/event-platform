@@ -438,7 +438,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 const categories = ['Shortboard', 'Longboard'];
 const subCategories = ['Men', 'Women'];
-const ageCategories = ['Open', 'Sub12', 'Sub14', 'Sub18', 'Professional', '+40', '+50', '+60'];
+const ageCategories = ['Open', 'Sub12', 'Sub14', 'Sub18', 'Professional', '+40', '+45', '+50', '+60', '+65', '+70'];
 
 const EventManagement = () => {
   const [events, setEvents] = useState([]);
@@ -580,24 +580,33 @@ const EventManagement = () => {
     }
   };
 
-  const handleCreateRounds = async () => {
-    // Logic to create rounds and heats
-    const numberOfRounds = Math.ceil(competitors.length / 4);
-    let newRounds = [];
-    for (let i = 1; i <= numberOfRounds; i++) {
-      newRounds.push({ id: `round-${i}`, name: `Round ${i}`, heats: [] });
-    }
-    setRounds(newRounds);
+  const handleCreateRounds = () => {
+    const groupedCompetitors = {};
 
-    // Assign competitors to heats in rounds
-    let newHeats = [];
-    competitors.forEach((competitor, index) => {
-      const roundIndex = Math.floor(index / 4);
-      if (!newHeats[roundIndex]) {
-        newHeats[roundIndex] = { id: `heat-${roundIndex + 1}`, competitors: [] };
+    competitors.forEach((competitor) => {
+      const key = `${competitor.category}-${competitor.sub_category}-${competitor.age_category}`;
+      if (!groupedCompetitors[key]) {
+        groupedCompetitors[key] = [];
       }
-      newHeats[roundIndex].competitors.push(competitor);
+      groupedCompetitors[key].push(competitor);
     });
+
+    let newRounds = [];
+    let newHeats = [];
+
+    Object.keys(groupedCompetitors).forEach((groupKey) => {
+      const groupCompetitors = groupedCompetitors[groupKey];
+      const numberOfRounds = Math.ceil(groupCompetitors.length / 4);
+
+      for (let i = 1; i <= numberOfRounds; i++) {
+        const roundId = `round-${groupKey}-${i}`;
+        newRounds.push({ id: roundId, name: `Round ${i} (${groupKey})`, heats: [] });
+        const heatCompetitors = groupCompetitors.splice(0, 4);
+        newHeats.push({ id: `heat-${roundId}`, competitors: heatCompetitors });
+      }
+    });
+
+    setRounds(newRounds);
     setHeats(newHeats);
   };
 
@@ -606,19 +615,30 @@ const EventManagement = () => {
       return;
     }
 
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
+    const sourceHeatIndex = heats.findIndex((heat) => heat.id === result.source.droppableId);
+    const destinationHeatIndex = heats.findIndex((heat) => heat.id === result.destination.droppableId);
 
-    const sourceRoundIndex = rounds.findIndex((round) => round.id === result.source.droppableId);
-    const destinationRoundIndex = rounds.findIndex((round) => round.id === result.destination.droppableId);
+    if (sourceHeatIndex === -1 || destinationHeatIndex === -1) {
+      return;
+    }
 
-    const sourceRound = rounds[sourceRoundIndex];
-    const destinationRound = rounds[destinationRoundIndex];
+    const sourceHeat = heats[sourceHeatIndex];
+    const destinationHeat = heats[destinationHeatIndex];
 
-    const [movedItem] = sourceRound.heats[sourceIndex].competitors.splice(sourceIndex, 1);
-    destinationRound.heats[destinationIndex].competitors.splice(destinationIndex, 0, movedItem);
+    const [movedItem] = sourceHeat.competitors.splice(result.source.index, 1);
+    destinationHeat.competitors.splice(result.destination.index, 0, movedItem);
 
-    setRounds([...rounds]);
+    const updatedHeats = heats.map((heat) => {
+      if (heat.id === sourceHeat.id) {
+        return sourceHeat;
+      }
+      if (heat.id === destinationHeat.id) {
+        return destinationHeat;
+      }
+      return heat;
+    });
+
+    setHeats(updatedHeats);
   };
 
   return (
@@ -719,7 +739,7 @@ const EventManagement = () => {
               </select>
             </div>
             <div className="form-group mt-3">
-              <label>Sub-Category:</label>
+              <label>Sub Category:</label>
               <select
                 className="form-control"
                 value={subCategory}
@@ -790,10 +810,7 @@ const EventManagement = () => {
                 key={competitor.id}
                 className="list-group-item d-flex justify-content-between align-items-center"
               >
-                {competitor.name} (Event: {selectedEventName}, Category:{' '}
-                {competitor.category}, Sub-Category: {competitor.sub_category},
-                Board Type: {competitor.board_type}, Gender: {competitor.gender}
-                , Age Category: {competitor.age_category})
+                {competitor.name} (Event: {selectedEventName}, Category: {competitor.category}, Sub Category: {competitor.sub_category}, Board Type: {competitor.board_type}, Gender: {competitor.gender}, Age Category: {competitor.age_category})
                 <button
                   className="btn btn-danger"
                   onClick={() => handleDeleteCompetitor(competitor.id)}
@@ -845,25 +862,50 @@ const EventManagement = () => {
           </button>
 
           <DragDropContext onDragEnd={handleDragEnd}>
-            {rounds.map((round, index) => (
+            {rounds.map((round) => (
               <Droppable droppableId={round.id} key={round.id}>
                 {(provided) => (
-                  <div ref={provided.innerRef} {...provided.droppableProps} className="mb-4">
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="mb-4"
+                  >
                     <h4>{round.name}</h4>
-                    {heats[index] &&
-                      heats[index].competitors.map((competitor, idx) => (
-                        <Draggable key={competitor.id} draggableId={competitor.id.toString()} index={idx}>
-                          {(provided) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className="list-group-item"
-                            >
-                              {competitor.name}
-                            </div>
-                          )}
-                        </Draggable>
+                    {heats
+                      .filter((heat) => heat.id.startsWith(`heat-${round.id}`))
+                      .map((heat, index) => (
+                        <div key={heat.id}>
+                          <h5>Heat {index + 1}</h5>
+                          <Droppable droppableId={heat.id}>
+                            {(provided) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.droppableProps}
+                                className="list-group"
+                              >
+                                {heat.competitors.map((competitor, idx) => (
+                                  <Draggable
+                                    key={competitor.id}
+                                    draggableId={competitor.id.toString()}
+                                    index={idx}
+                                  >
+                                    {(provided) => (
+                                      <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        className="list-group-item"
+                                      >
+                                        {competitor.name}
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                ))}
+                                {provided.placeholder}
+                              </div>
+                            )}
+                          </Droppable>
+                        </div>
                       ))}
                     {provided.placeholder}
                   </div>
@@ -873,10 +915,14 @@ const EventManagement = () => {
           </DragDropContext>
         </>
       ) : (
-        <p className="mt-4">Please select an event to manage competitors and judges.</p>
+        <p className="mt-4">
+          Please select an event to manage competitors and judges.
+        </p>
       )}
     </div>
   );
 };
 
 export default EventManagement;
+
+
