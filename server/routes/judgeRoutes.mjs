@@ -25,7 +25,7 @@ router.get('/get-events/:judge_id', async (req, res) => {
       const result = await pool.query(
           `SELECT e.* FROM events e
            JOIN judges j ON j.event_id = e.id
-           WHERE j.user_id = $1`,
+           WHERE j.id = $1`,
           [judge_id]
       );
       res.status(200).json(result.rows);

@@ -83,7 +83,7 @@ const ScoreManagement = () => {
   const [competitors, setCompetitors] = useState([]);
   const [scores, setScores] = useState([]);
   const [score, setScore] = useState('');
-  const [judgeId, setJudgeId] = useState('');  
+  const [judgeId, setJudgeId] = useState(1);  
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedRound, setSelectedRound] = useState(null);
   const [rounds, setRounds] = useState([]);
@@ -244,4 +244,5 @@ const ScoreManagement = () => {
 };
 
 export default ScoreManagement;
+
 
