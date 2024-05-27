@@ -1,24 +1,26 @@
-// import React, { useState, useEffect } from 'react';
-// import axios from 'axios';
-// import 'bootstrap/dist/css/bootstrap.min.css';
-
-// const categories = ['Shortboard', 'Longboard'];
-// const subCategories = ['Women', 'Men', 'Open', 'Sub12', 'Sub14', 'Sub18', 'Professional', '+40', '+50', '+60'];
+// import React, { useState, useEffect } from "react";
+// import axios from "axios";
+// import "bootstrap/dist/css/bootstrap.min.css";
 
 // const EventManagement = () => {
 //   const [events, setEvents] = useState([]);
 //   const [competitors, setCompetitors] = useState([]);
 //   const [judges, setJudges] = useState([]);
 //   const [eventId, setEventId] = useState(null);
-//   const [name, setName] = useState('');
-//   const [date, setDate] = useState('');
-//   const [location, setLocation] = useState('');
-//   const [competitorName, setCompetitorName] = useState('');
-//   const [category, setCategory] = useState(categories[0]);
-//   const [subCategory, setSubCategory] = useState(subCategories[0]);
-//   const [judgeName, setJudgeName] = useState('');
+//   const [name, setName] = useState("");
+//   const [date, setDate] = useState("");
+//   const [location, setLocation] = useState("");
+//   const [competitorName, setCompetitorName] = useState("");
+//   const [category, setCategory] = useState("");
+//   const [subCategory, setSubCategory] = useState("");
+//   const [boardType, setBoardType] = useState("");
+//   const [gender, setGender] = useState("");
+//   const [ageCategory, setAgeCategory] = useState("");
+//   const [judgeName, setJudgeName] = useState("");
 //   const [createdBy, setCreatedBy] = useState(1);
-//   const [selectedEventName, setSelectedEventName] = useState('');
+//   const [selectedEventName, setSelectedEventName] = useState("");
+//   const [rounds, setRounds] = useState([]);
+//   const [heats, setHeats] = useState([]);
 
 //   useEffect(() => {
 //     fetchEvents();
@@ -26,108 +28,174 @@
 
 //   const fetchEvents = async () => {
 //     try {
-//       const response = await axios.get('http://localhost:3000/event-admin/get-events');
+//       const response = await axios.get(
+//         "http://localhost:3000/event-admin/get-events"
+//       );
 //       setEvents(response.data);
 //     } catch (error) {
-//       console.error('Error fetching events:', error);
+//       console.error("Error fetching events:", error);
 //     }
 //   };
 
 //   const fetchCompetitors = async (eventId, eventName) => {
 //     try {
-//       const response = await axios.get(`http://localhost:3000/event-admin/get-competitors/${eventId}`);
+//       const response = await axios.get(
+//         `http://localhost:3000/event-admin/get-competitors/${eventId}`
+//       );
 //       setCompetitors(response.data);
 //       setEventId(eventId);
 //       setSelectedEventName(eventName);
 //     } catch (error) {
-//       console.error('Error fetching competitors:', error);
+//       console.error("Error fetching competitors:", error);
 //     }
 //   };
 
 //   const fetchJudges = async (eventId) => {
 //     try {
-//       const response = await axios.get(`http://localhost:3000/event-admin/get-judges/${eventId}`);
+//       const response = await axios.get(
+//         `http://localhost:3000/event-admin/get-judges/${eventId}`
+//       );
 //       setJudges(response.data);
 //     } catch (error) {
-//       console.error('Error fetching judges:', error);
+//       console.error("Error fetching judges:", error);
 //     }
 //   };
 
 //   const handleCreateEvent = async (e) => {
 //     e.preventDefault();
 //     try {
-//       await axios.post('http://localhost:3000/event-admin/create-event', { name, date, location, created_by: createdBy });
-//       alert('Event created successfully');
-//       setName('');
-//       setDate('');
-//       setLocation('');
+//       await axios.post("http://localhost:3000/event-admin/create-event", {
+//         name,
+//         date,
+//         location,
+//         created_by: createdBy,
+//       });
+//       alert("Event created successfully");
+//       setName("");
+//       setDate("");
+//       setLocation("");
 //       fetchEvents();
 //     } catch (error) {
-//       console.error('Error creating event:', error);
-//       alert('Error creating event');
+//       console.error("Error creating event:", error);
+//       alert("Error creating event");
 //     }
 //   };
 
 //   const handleDeleteEvent = async (id) => {
 //     try {
-//       await axios.delete(`http://localhost:3000/event-admin/delete-event/${id}`);
-//       alert('Event deleted successfully');
+//       await axios.delete(
+//         `http://localhost:3000/event-admin/delete-event/${id}`
+//       );
+//       alert("Event deleted successfully");
 //       fetchEvents();
 //     } catch (error) {
-//       console.error('Error deleting event:', error);
-//       alert('Error deleting event');
+//       console.error("Error deleting event:", error);
+//       alert("Error deleting event");
 //     }
 //   };
 
 //   const handleAddCompetitor = async (e) => {
 //     e.preventDefault();
 //     try {
-//       await axios.post('http://localhost:3000/event-admin/add-competitor', { name: competitorName, event_id: eventId, category, sub_category: subCategory });
-//       alert('Competitor added successfully');
-//       setCompetitorName('');
-//       setCategory(categories[0]);
-//       setSubCategory(subCategories[0]);
+//       await axios.post("http://localhost:3000/event-admin/add-competitor", {
+//         name: competitorName,
+//         event_id: eventId,
+//         category,
+//         sub_category: subCategory,
+//         board_type: boardType,
+//         gender,
+//         age_category: ageCategory,
+//       });
+//       alert("Competitor added successfully");
+//       setCompetitorName("");
+//       setCategory("");
+//       setSubCategory("");
+//       setBoardType("");
+//       setGender("");
+//       setAgeCategory("");
 //       fetchCompetitors(eventId, selectedEventName);
 //     } catch (error) {
-//       console.error('Error adding competitor:', error);
-//       alert('Error adding competitor');
+//       console.error("Error adding competitor:", error);
+//       alert("Error adding competitor");
 //     }
 //   };
 
 //   const handleDeleteCompetitor = async (id) => {
 //     try {
-//       await axios.delete(`http://localhost:3000/event-admin/delete-competitor/${id}`);
-//       alert('Competitor deleted successfully');
+//       await axios.delete(
+//         `http://localhost:3000/event-admin/delete-competitor/${id}`
+//       );
+//       alert("Competitor deleted successfully");
 //       fetchCompetitors(eventId, selectedEventName);
 //     } catch (error) {
-//       console.error('Error deleting competitor:', error);
-//       alert('Error deleting competitor');
+//       console.error("Error deleting competitor:", error);
+//       alert("Error deleting competitor");
 //     }
 //   };
 
 //   const handleAddJudge = async (e) => {
 //     e.preventDefault();
 //     try {
-//       await axios.post('http://localhost:3000/event-admin/add-judge', { name: judgeName, event_id: eventId });
-//       alert('Judge added successfully');
-//       setJudgeName('');
+//       await axios.post("http://localhost:3000/event-admin/add-judge", {
+//         name: judgeName,
+//         event_id: eventId,
+//       });
+//       alert("Judge added successfully");
+//       setJudgeName("");
 //       fetchJudges(eventId);
 //     } catch (error) {
-//       console.error('Error adding judge:', error);
-//       alert('Error adding judge');
+//       console.error("Error adding judge:", error);
+//       alert("Error adding judge");
 //     }
 //   };
 
 //   const handleDeleteJudge = async (id) => {
 //     try {
-//       await axios.delete(`http://localhost:3000/event-admin/delete-judge/${id}`);
-//       alert('Judge deleted successfully');
+//       await axios.delete(
+//         `http://localhost:3000/event-admin/delete-judge/${id}`
+//       );
+//       alert("Judge deleted successfully");
 //       fetchJudges(eventId);
 //     } catch (error) {
-//       console.error('Error deleting judge:', error);
-//       alert('Error deleting judge');
+//       console.error("Error deleting judge:", error);
+//       alert("Error deleting judge");
 //     }
 //   };
+
+//   const fetchRounds = async (eventId) => {
+//     try {
+//       const response = await axios.get(
+//         `http://localhost:3000/event-admin/get-rounds/${eventId}`
+//       );
+//       setRounds(response.data);
+//     } catch (error) {
+//       console.error("Error fetching rounds:", error);
+//     }
+//   };
+
+//   const fetchHeats = async (roundId) => {
+//     try {
+//       const response = await axios.get(
+//         `http://localhost:3000/event-admin/get-heats/${roundId}`
+//       );
+//       setHeats(response.data);
+//     } catch (error) {
+//       console.error("Error fetching heats:", error);
+//     }
+//   };
+
+//   const categories = ["Shortboard", "Longboard"];
+//   const subCategories = ["Men", "Woman"];
+//   const ageCategories = [
+//     "Open",
+//     "Sub12",
+//     "Sub14",
+//     "Sub18",
+//     "Professional",
+//     "+40",
+//     "+50",
+//     "+60",
+//   ];
 
 //   return (
 //     <div className="container mt-5">
@@ -163,7 +231,9 @@
 //             required
 //           />
 //         </div>
-//         <button type="submit" className="btn btn-primary mt-3">Create Event</button>
+//         <button type="submit" className="btn btn-primary mt-3">
+//           Create Event
+//         </button>
 //       </form>
 
 //       <h3>Existing Events</h3>
@@ -174,15 +244,22 @@
 //           {events.map((event) => (
 //             <li
 //               key={event.id}
-//               className={`list-group-item d-flex justify-content-between align-items-center ${eventId === event.id ? 'active' : ''}`}
-//               style={{ cursor: 'pointer' }}
+//               className={`list-group-item d-flex justify-content-between align-items-center ${
+//                 eventId === event.id ? "active" : ""
+//               }`}
+//               style={{ cursor: "pointer" }}
 //               onClick={() => {
 //                 fetchCompetitors(event.id, event.name);
 //                 fetchJudges(event.id);
 //               }}
 //             >
 //               {event.name}
-//               <button className="btn btn-danger" onClick={() => handleDeleteEvent(event.id)}>Delete</button>
+//               <button
+//                 className="btn btn-danger"
+//                 onClick={() => handleDeleteEvent(event.id)}
+//               >
+//                 Delete
+//               </button>
 //             </li>
 //           ))}
 //         </ul>
@@ -210,33 +287,100 @@
 //                 onChange={(e) => setCategory(e.target.value)}
 //                 required
 //               >
+//                 <option value="">Select Category</option>
 //                 {categories.map((cat) => (
-//                   <option key={cat} value={cat}>{cat}</option>
+//                   <option key={cat} value={cat}>
+//                     {cat}
+//                   </option>
 //                 ))}
 //               </select>
 //             </div>
 //             <div className="form-group mt-3">
-//               <label>Sub-Category:</label>
+//               <label>Sub Category:</label>
 //               <select
 //                 className="form-control"
 //                 value={subCategory}
 //                 onChange={(e) => setSubCategory(e.target.value)}
 //                 required
 //               >
+//                 <option value="">Select Sub Category</option>
 //                 {subCategories.map((subCat) => (
-//                   <option key={subCat} value={subCat}>{subCat}</option>
+//                   <option key={subCat} value={subCat}>
+//                     {subCat}
+//                   </option>
 //                 ))}
 //               </select>
 //             </div>
-//             <button type="submit" className="btn btn-primary mt-3">Add Competitor</button>
+//             <div className="form-group mt-3">
+//               <label>Board Type:</label>
+//               <select
+//                 className="form-control"
+//                 value={boardType}
+//                 onChange={(e) => setBoardType(e.target.value)}
+//                 required
+//               >
+//                 <option value="">Select Board Type</option>
+//                 {categories.map((type) => (
+//                   <option key={type} value={type}>
+//                     {type}
+//                   </option>
+//                 ))}
+//               </select>
+//             </div>
+//             <div className="form-group mt-3">
+//               <label>Gender:</label>
+//               <select
+//                 className="form-control"
+//                 value={gender}
+//                 onChange={(e) => setGender(e.target.value)}
+//                 required
+//               >
+//                 <option value="">Select Gender</option>
+//                 {subCategories.map((g) => (
+//                   <option key={g} value={g}>
+//                     {g}
+//                   </option>
+//                 ))}
+//               </select>
+//             </div>
+//             <div className="form-group mt-3">
+//               <label>Age Category:</label>
+//               <select
+//                 className="form-control"
+//                 value={ageCategory}
+//                 onChange={(e) => setAgeCategory(e.target.value)}
+//                 required
+//               >
+//                 <option value="">Select Age Category</option>
+//                 {ageCategories.map((cat) => (
+//                   <option key={cat} value={cat}>
+//                     {cat}
+//                   </option>
+//                 ))}
+//               </select>
+//             </div>
+//             <button type="submit" className="btn btn-primary mt-3">
+//               Add Competitor
+//             </button>
 //           </form>
 
 //           <h3>Existing Competitors</h3>
 //           <ul className="list-group">
 //             {competitors.map((competitor) => (
-//               <li key={competitor.id} className="list-group-item d-flex justify-content-between align-items-center">
-//                 {competitor.name} (Event: {selectedEventName}, Category: {competitor.category}, Sub-Category: {competitor.sub_category})
-//                 <button className="btn btn-danger" onClick={() => handleDeleteCompetitor(competitor.id)}>Delete</button>
+//               <li
+//                 key={competitor.id}
+//                 className="list-group-item d-flex justify-content-between align-items-center"
+//               >
+//                 {competitor.name} (Event: {selectedEventName}, Category:{" "}
+//                 {competitor.category}, Sub Category: {competitor.sub_category},
+//                 Board Type: {competitor.board_type}, Gender: {competitor.gender}
+//                 , Age Category: {competitor.age_category})
+//                 <button
+//                   className="btn btn-danger"
+//                   onClick={() => handleDeleteCompetitor(competitor.id)}
+//                 >
+//                   Delete
+//                 </button>
 //               </li>
 //             ))}
 //           </ul>
@@ -253,21 +397,33 @@
 //                 required
 //               />
 //             </div>
-//             <button type="submit" className="btn btn-primary mt-3">Add Judge</button>
+//             <button type="submit" className="btn btn-primary mt-3">
+//               Add Judge
+//             </button>
 //           </form>
 
 //           <h3>Existing Judges</h3>
 //           <ul className="list-group">
 //             {judges.map((judge) => (
-//               <li key={judge.id} className="list-group-item d-flex justify-content-between align-items-center">
+//               <li
+//                 key={judge.id}
+//                 className="list-group-item d-flex justify-content-between align-items-center"
+//               >
 //                 {judge.name} (Event: {selectedEventName})
-//                 <button className="btn btn-danger" onClick={() => handleDeleteJudge(judge.id)}>Delete</button>
+//                 <button
+//                   className="btn btn-danger"
+//                   onClick={() => handleDeleteJudge(judge.id)}
+//                 >
+//                   Delete
+//                 </button>
 //               </li>
 //             ))}
 //           </ul>
 //         </>
 //       ) : (
-//         <p className="mt-4">Please select an event to manage competitors and judges.</p>
+//         <p className="mt-4">
+//           Please select an event to manage competitors and judges.
+//         </p>
 //       )}
 //     </div>
 //   );
@@ -275,29 +431,34 @@
 
 // export default EventManagement;
 
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+const categories = ['Shortboard', 'Longboard'];
+const subCategories = ['Men', 'Women'];
+const ageCategories = ['Open', 'Sub12', 'Sub14', 'Sub18', 'Professional', '+40', '+50', '+60'];
 
 const EventManagement = () => {
   const [events, setEvents] = useState([]);
   const [competitors, setCompetitors] = useState([]);
   const [judges, setJudges] = useState([]);
-  const [eventId, setEventId] = useState(null);
-  const [name, setName] = useState("");
-  const [date, setDate] = useState("");
-  const [location, setLocation] = useState("");
-  const [competitorName, setCompetitorName] = useState("");
-  const [category, setCategory] = useState("");
-  const [subCategory, setSubCategory] = useState("");
-  const [boardType, setBoardType] = useState("");
-  const [gender, setGender] = useState("");
-  const [ageCategory, setAgeCategory] = useState("");
-  const [judgeName, setJudgeName] = useState("");
-  const [createdBy, setCreatedBy] = useState(1);
-  const [selectedEventName, setSelectedEventName] = useState("");
   const [rounds, setRounds] = useState([]);
   const [heats, setHeats] = useState([]);
+  const [eventId, setEventId] = useState(null);
+  const [name, setName] = useState('');
+  const [date, setDate] = useState('');
+  const [location, setLocation] = useState('');
+  const [competitorName, setCompetitorName] = useState('');
+  const [category, setCategory] = useState(categories[0]);
+  const [subCategory, setSubCategory] = useState(subCategories[0]);
+  const [boardType, setBoardType] = useState(categories[0]);
+  const [gender, setGender] = useState(subCategories[0]);
+  const [ageCategory, setAgeCategory] = useState(ageCategories[0]);
+  const [judgeName, setJudgeName] = useState('');
+  const [createdBy, setCreatedBy] = useState(1);
+  const [selectedEventName, setSelectedEventName] = useState('');
 
   useEffect(() => {
     fetchEvents();
@@ -305,76 +466,63 @@ const EventManagement = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:3000/event-admin/get-events"
-      );
+      const response = await axios.get('http://localhost:3000/event-admin/get-events');
       setEvents(response.data);
     } catch (error) {
-      console.error("Error fetching events:", error);
+      console.error('Error fetching events:', error);
     }
   };
 
   const fetchCompetitors = async (eventId, eventName) => {
     try {
-      const response = await axios.get(
-        `http://localhost:3000/event-admin/get-competitors/${eventId}`
-      );
+      const response = await axios.get(`http://localhost:3000/event-admin/get-competitors/${eventId}`);
       setCompetitors(response.data);
       setEventId(eventId);
       setSelectedEventName(eventName);
     } catch (error) {
-      console.error("Error fetching competitors:", error);
+      console.error('Error fetching competitors:', error);
     }
   };
 
   const fetchJudges = async (eventId) => {
     try {
-      const response = await axios.get(
-        `http://localhost:3000/event-admin/get-judges/${eventId}`
-      );
+      const response = await axios.get(`http://localhost:3000/event-admin/get-judges/${eventId}`);
       setJudges(response.data);
     } catch (error) {
-      console.error("Error fetching judges:", error);
+      console.error('Error fetching judges:', error);
     }
   };
 
   const handleCreateEvent = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3000/event-admin/create-event", {
-        name,
-        date,
-        location,
-        created_by: createdBy,
-      });
-      alert("Event created successfully");
-      setName("");
-      setDate("");
-      setLocation("");
+      await axios.post('http://localhost:3000/event-admin/create-event', { name, date, location, created_by: createdBy });
+      alert('Event created successfully');
+      setName('');
+      setDate('');
+      setLocation('');
       fetchEvents();
     } catch (error) {
-      console.error("Error creating event:", error);
-      alert("Error creating event");
+      console.error('Error creating event:', error);
+      alert('Error creating event');
     }
   };
 
   const handleDeleteEvent = async (id) => {
     try {
-      await axios.delete(
-        `http://localhost:3000/event-admin/delete-event/${id}`
-      );
-      alert("Event deleted successfully");
+      await axios.delete(`http://localhost:3000/event-admin/delete-event/${id}`);
+      alert('Event deleted successfully');
       fetchEvents();
     } catch (error) {
-      console.error("Error deleting event:", error);
-      alert("Error deleting event");
+      console.error('Error deleting event:', error);
+      alert('Error deleting event');
     }
   };
 
   const handleAddCompetitor = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3000/event-admin/add-competitor", {
+      await axios.post('http://localhost:3000/event-admin/add-competitor', {
         name: competitorName,
         event_id: eventId,
         category,
@@ -383,96 +531,95 @@ const EventManagement = () => {
         gender,
         age_category: ageCategory,
       });
-      alert("Competitor added successfully");
-      setCompetitorName("");
-      setCategory("");
-      setSubCategory("");
-      setBoardType("");
-      setGender("");
-      setAgeCategory("");
+      alert('Competitor added successfully');
+      setCompetitorName('');
+      setCategory(categories[0]);
+      setSubCategory(subCategories[0]);
+      setBoardType(categories[0]);
+      setGender(subCategories[0]);
+      setAgeCategory(ageCategories[0]);
       fetchCompetitors(eventId, selectedEventName);
     } catch (error) {
-      console.error("Error adding competitor:", error);
-      alert("Error adding competitor");
+      console.error('Error adding competitor:', error);
+      alert('Error adding competitor');
     }
   };
 
   const handleDeleteCompetitor = async (id) => {
     try {
-      await axios.delete(
-        `http://localhost:3000/event-admin/delete-competitor/${id}`
-      );
-      alert("Competitor deleted successfully");
+      await axios.delete(`http://localhost:3000/event-admin/delete-competitor/${id}`);
+      alert('Competitor deleted successfully');
       fetchCompetitors(eventId, selectedEventName);
     } catch (error) {
-      console.error("Error deleting competitor:", error);
-      alert("Error deleting competitor");
+      console.error('Error deleting competitor:', error);
+      alert('Error deleting competitor');
     }
   };
 
   const handleAddJudge = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3000/event-admin/add-judge", {
-        name: judgeName,
-        event_id: eventId,
-      });
-      alert("Judge added successfully");
-      setJudgeName("");
+      await axios.post('http://localhost:3000/event-admin/add-judge', { name: judgeName, event_id: eventId });
+      alert('Judge added successfully');
+      setJudgeName('');
       fetchJudges(eventId);
     } catch (error) {
-      console.error("Error adding judge:", error);
-      alert("Error adding judge");
+      console.error('Error adding judge:', error);
+      alert('Error adding judge');
     }
   };
 
   const handleDeleteJudge = async (id) => {
     try {
-      await axios.delete(
-        `http://localhost:3000/event-admin/delete-judge/${id}`
-      );
-      alert("Judge deleted successfully");
+      await axios.delete(`http://localhost:3000/event-admin/delete-judge/${id}`);
+      alert('Judge deleted successfully');
       fetchJudges(eventId);
     } catch (error) {
-      console.error("Error deleting judge:", error);
-      alert("Error deleting judge");
+      console.error('Error deleting judge:', error);
+      alert('Error deleting judge');
     }
   };
 
-  const fetchRounds = async (eventId) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/event-admin/get-rounds/${eventId}`
-      );
-      setRounds(response.data);
-    } catch (error) {
-      console.error("Error fetching rounds:", error);
+  const handleCreateRounds = async () => {
+    // Logic to create rounds and heats
+    const numberOfRounds = Math.ceil(competitors.length / 4);
+    let newRounds = [];
+    for (let i = 1; i <= numberOfRounds; i++) {
+      newRounds.push({ id: `round-${i}`, name: `Round ${i}`, heats: [] });
     }
+    setRounds(newRounds);
+
+    // Assign competitors to heats in rounds
+    let newHeats = [];
+    competitors.forEach((competitor, index) => {
+      const roundIndex = Math.floor(index / 4);
+      if (!newHeats[roundIndex]) {
+        newHeats[roundIndex] = { id: `heat-${roundIndex + 1}`, competitors: [] };
+      }
+      newHeats[roundIndex].competitors.push(competitor);
+    });
+    setHeats(newHeats);
   };
 
-  const fetchHeats = async (roundId) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/event-admin/get-heats/${roundId}`
-      );
-      setHeats(response.data);
-    } catch (error) {
-      console.error("Error fetching heats:", error);
+  const handleDragEnd = (result) => {
+    if (!result.destination) {
+      return;
     }
-  };
 
-  const categories = ["Shortboard", "Longboard"];
-  const subCategories = ["Men", "Woman"];
-  const ageCategories = [
-    "Open",
-    "Sub12",
-    "Sub14",
-    "Sub18",
-    "Professional",
-    "+40",
-    "+50",
-    "+60",
-  ];
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
+
+    const sourceRoundIndex = rounds.findIndex((round) => round.id === result.source.droppableId);
+    const destinationRoundIndex = rounds.findIndex((round) => round.id === result.destination.droppableId);
+
+    const sourceRound = rounds[sourceRoundIndex];
+    const destinationRound = rounds[destinationRoundIndex];
+
+    const [movedItem] = sourceRound.heats[sourceIndex].competitors.splice(sourceIndex, 1);
+    destinationRound.heats[destinationIndex].competitors.splice(destinationIndex, 0, movedItem);
+
+    setRounds([...rounds]);
+  };
 
   return (
     <div className="container mt-5">
@@ -522,9 +669,9 @@ const EventManagement = () => {
             <li
               key={event.id}
               className={`list-group-item d-flex justify-content-between align-items-center ${
-                eventId === event.id ? "active" : ""
+                eventId === event.id ? 'active' : ''
               }`}
-              style={{ cursor: "pointer" }}
+              style={{ cursor: 'pointer' }}
               onClick={() => {
                 fetchCompetitors(event.id, event.name);
                 fetchJudges(event.id);
@@ -564,7 +711,6 @@ const EventManagement = () => {
                 onChange={(e) => setCategory(e.target.value)}
                 required
               >
-                <option value="">Select Category</option>
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
@@ -573,14 +719,13 @@ const EventManagement = () => {
               </select>
             </div>
             <div className="form-group mt-3">
-              <label>Sub Category:</label>
+              <label>Sub-Category:</label>
               <select
                 className="form-control"
                 value={subCategory}
                 onChange={(e) => setSubCategory(e.target.value)}
                 required
               >
-                <option value="">Select Sub Category</option>
                 {subCategories.map((subCat) => (
                   <option key={subCat} value={subCat}>
                     {subCat}
@@ -596,7 +741,6 @@ const EventManagement = () => {
                 onChange={(e) => setBoardType(e.target.value)}
                 required
               >
-                <option value="">Select Board Type</option>
                 {categories.map((type) => (
                   <option key={type} value={type}>
                     {type}
@@ -612,7 +756,6 @@ const EventManagement = () => {
                 onChange={(e) => setGender(e.target.value)}
                 required
               >
-                <option value="">Select Gender</option>
                 {subCategories.map((g) => (
                   <option key={g} value={g}>
                     {g}
@@ -628,7 +771,6 @@ const EventManagement = () => {
                 onChange={(e) => setAgeCategory(e.target.value)}
                 required
               >
-                <option value="">Select Age Category</option>
                 {ageCategories.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
@@ -648,8 +790,8 @@ const EventManagement = () => {
                 key={competitor.id}
                 className="list-group-item d-flex justify-content-between align-items-center"
               >
-                {competitor.name} (Event: {selectedEventName}, Category:{" "}
-                {competitor.category}, Sub Category: {competitor.sub_category},
+                {competitor.name} (Event: {selectedEventName}, Category:{' '}
+                {competitor.category}, Sub-Category: {competitor.sub_category},
                 Board Type: {competitor.board_type}, Gender: {competitor.gender}
                 , Age Category: {competitor.age_category})
                 <button
@@ -696,11 +838,42 @@ const EventManagement = () => {
               </li>
             ))}
           </ul>
+
+          <h3>Rounds</h3>
+          <button className="btn btn-primary mb-4" onClick={handleCreateRounds}>
+            Create Rounds
+          </button>
+
+          <DragDropContext onDragEnd={handleDragEnd}>
+            {rounds.map((round, index) => (
+              <Droppable droppableId={round.id} key={round.id}>
+                {(provided) => (
+                  <div ref={provided.innerRef} {...provided.droppableProps} className="mb-4">
+                    <h4>{round.name}</h4>
+                    {heats[index] &&
+                      heats[index].competitors.map((competitor, idx) => (
+                        <Draggable key={competitor.id} draggableId={competitor.id.toString()} index={idx}>
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="list-group-item"
+                            >
+                              {competitor.name}
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            ))}
+          </DragDropContext>
         </>
       ) : (
-        <p className="mt-4">
-          Please select an event to manage competitors and judges.
-        </p>
+        <p className="mt-4">Please select an event to manage competitors and judges.</p>
       )}
     </div>
   );
