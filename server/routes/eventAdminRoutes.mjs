@@ -1,5 +1,6 @@
 import express from "express";
 import pool from "../db.mjs";
+import Pool  from 'pg';
 
 const router = express.Router();
 
@@ -295,6 +296,50 @@ router.get("/get-heat-competitors/:heat_id", async (req, res) => {
     res.status(200).json(result.rows);
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Save Rounds
+router.post('/save-rounds', async (req, res) => {
+  const { rounds, eventId } = req.body;
+
+  try {
+    await pool.query('BEGIN');
+
+    // Delete existing rounds and heats for the event
+    await pool.query('DELETE FROM heats WHERE round_id IN (SELECT id FROM rounds WHERE event_id = $1)', [eventId]);
+    await pool.query('DELETE FROM rounds WHERE event_id = $1', [eventId]);
+
+    // Insert new rounds and heats
+    for (const round of rounds) {
+      const roundResult = await pool.query(
+        'INSERT INTO rounds (event_id, category, sub_category, board_type, gender, age_category) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+        [eventId, round.category, round.subCategory, round.boardType, round.gender, round.ageCategory]
+      );
+      const roundId = roundResult.rows[0].id;
+
+      for (const heat of round.heats) {
+        const heatResult = await pool.query(
+          'INSERT INTO heats (round_id) VALUES ($1) RETURNING id',
+          [roundId]
+        );
+        const heatId = heatResult.rows[0].id;
+
+        for (const competitor of heat.competitors) {
+          await pool.query(
+            'INSERT INTO heat_competitors (heat_id, competitor_id) VALUES ($1, $2)',
+            [heatId, competitor.id]
+          );
+        }
+      }
+    }
+
+    await pool.query('COMMIT');
+    res.status(200).json({ message: 'Rounds saved successfully' });
+  } catch (error) {
+    await pool.query('ROLLBACK');
+    console.error('Error saving rounds:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 
