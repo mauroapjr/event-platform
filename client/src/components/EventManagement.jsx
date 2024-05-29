@@ -1363,7 +1363,6 @@ const EventManagement = () => {
   const [competitors, setCompetitors] = useState([]);
   const [judges, setJudges] = useState([]);
   const [rounds, setRounds] = useState([]);
-  const [heats, setHeats] = useState([]);
   const [eventId, setEventId] = useState(null);
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
@@ -1550,25 +1549,54 @@ const EventManagement = () => {
       const response = await axios.get(
         `http://localhost:3000/event-admin/get-rounds/${eventId}`
       );
-      const fetchedRounds = response.data;
-
-      const processedRounds = fetchedRounds.map((round) => ({
-        ...round,
-        heats: round.heats.map((heat) => ({
-          ...heat,
-          competitors: heat.competitors.map((c) => ({
-            id: c.id,
-            name: c.name,
+      const rounds = response.data;
+  
+      const processedRounds = rounds.map((round) => {
+        return {
+          ...round,
+          heats: round.heats.map((heat) => ({
+            ...heat,
+            competitors: heat.competitors.map((competitor) => ({
+              id: competitor.id,
+              name: competitor.name,
+            })),
           })),
-        })),
-      }));
-
+        };
+      });
+  
       setRounds(processedRounds);
     } catch (error) {
       console.error("Error fetching rounds:", error);
       alert("Error fetching rounds");
     }
   };
+
+  // const handleFetchRounds = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `http://localhost:3000/event-admin/get-rounds/${eventId}`
+  //     );
+  //     const { rounds } = response.data;
+
+  //     const processedRounds = rounds.map((round) => {
+  //       return {
+  //         ...round,
+  //         heats: round.heats.map((heat) => ({
+  //           ...heat,
+  //           competitors: heat.competitors.map((competitor) => ({
+  //             id: competitor.id,
+  //             name: competitor.name,
+  //           })),
+  //         })),
+  //       };
+  //     });
+
+  //     setRounds(processedRounds);
+  //   } catch (error) {
+  //     console.error("Error fetching rounds:", error);
+  //     alert("Error fetching rounds");
+  //   }
+  // };
 
   const handleGeneratePDF = async () => {
     try {
@@ -1647,11 +1675,11 @@ const EventManagement = () => {
       return;
     }
 
-    const sourceHeatIndex = rounds.findIndex(
-      (round) => round.id === result.source.droppableId
+    const sourceHeatIndex = rounds.findIndex((round) =>
+      round.heats.some((heat) => heat.id === result.source.droppableId)
     );
-    const destinationHeatIndex = rounds.findIndex(
-      (round) => round.id === result.destination.droppableId
+    const destinationHeatIndex = rounds.findIndex((round) =>
+      round.heats.some((heat) => heat.id === result.destination.droppableId)
     );
 
     if (sourceHeatIndex === -1 || destinationHeatIndex === -1) {
@@ -1661,11 +1689,15 @@ const EventManagement = () => {
     const sourceRound = rounds[sourceHeatIndex];
     const destinationRound = rounds[destinationHeatIndex];
 
-    const [movedItem] = sourceRound.heats[result.source.index].competitors.splice(
-      result.source.index,
-      1
+    const sourceHeat = sourceRound.heats.find(
+      (heat) => heat.id === result.source.droppableId
     );
-    destinationRound.heats[result.destination.index].competitors.splice(
+    const destinationHeat = destinationRound.heats.find(
+      (heat) => heat.id === result.destination.droppableId
+    );
+
+    const [movedItem] = sourceHeat.competitors.splice(result.source.index, 1);
+    destinationHeat.competitors.splice(
       result.destination.index,
       0,
       movedItem
@@ -1935,36 +1967,38 @@ const EventManagement = () => {
                   >
                     <h4>{round.name}</h4>
                     {round.heats.map((heat, index) => (
-                      <Droppable droppableId={heat.id} key={heat.id}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            className="list-group mb-2"
-                          >
-                            <h5>Heat {index + 1}</h5>
-                            {heat.competitors.map((competitor, idx) => (
-                              <Draggable
-                                key={competitor.id}
-                                draggableId={competitor.id.toString()}
-                                index={idx}
-                              >
-                                {(provided) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                    className="list-group-item"
-                                  >
-                                    {competitor.name}
-                                  </div>
-                                )}
-                              </Draggable>
-                            ))}
-                            {provided.placeholder}
-                          </div>
-                        )}
-                      </Droppable>
+                      <div key={heat.id}>
+                        <h5>Heat {index + 1}</h5>
+                        <Droppable droppableId={heat.id}>
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                              className="list-group"
+                            >
+                              {heat.competitors.map((competitor, idx) => (
+                                <Draggable
+                                  key={competitor.id}
+                                  draggableId={competitor.id.toString()}
+                                  index={idx}
+                                >
+                                  {(provided) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      className="list-group-item"
+                                    >
+                                      {competitor.name}
+                                    </div>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {provided.placeholder}
+                            </div>
+                          )}
+                        </Droppable>
+                      </div>
                     ))}
                     {provided.placeholder}
                   </div>
@@ -2005,3 +2039,4 @@ const EventManagement = () => {
 };
 
 export default EventManagement;
+
