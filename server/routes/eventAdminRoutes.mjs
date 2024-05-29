@@ -93,34 +93,6 @@ router.get("/get-competitors/:eventId", async (req, res) => {
 });
 
 // Add Competitor
-// router.post('/add-competitor', async (req, res) => {
-//   const { name, event_id } = req.body;
-//   try {
-//     const newCompetitor = await pool.query(
-//       'INSERT INTO competitors (name, event_id) VALUES ($1, $2) RETURNING *',
-//       [name, event_id]
-//     );
-//     res.status(201).json(newCompetitor.rows[0]);
-//   } catch (err) {
-//     res.status(500).json({ message: 'Server error', error: err.message });
-//   }
-// });
-
-// router.post('/add-competitor', async (req, res) => {
-//   const { name, event_id, category, sub_category } = req.body;
-
-//   try {
-//     const newCompetitor = await pool.query(
-//       'INSERT INTO competitors (name, event_id, category, sub_category) VALUES ($1, $2, $3, $4) RETURNING *',
-//       [name, event_id, category, sub_category]
-//     );
-//     res.status(201).json(newCompetitor.rows[0]);
-//   } catch (err) {
-//     res.status(500).json({ message: 'Server error', error: err.message });
-//   }
-// });
-
-// Add Competitor
 router.post("/add-competitor", async (req, res) => {
   const {
     name,
@@ -348,17 +320,30 @@ router.post('/save-rounds', async (req, res) => {
 
 
 // Get all rounds for an event
-router.get('/get-all-rounds/:eventId', async (req, res) => {
+router.get('/get-rounds/:eventId', async (req, res) => {
   const { eventId } = req.params;
 
   try {
     const roundsResult = await pool.query('SELECT * FROM rounds WHERE event_id = $1', [eventId]);
-    const heatsResult = await pool.query('SELECT h.*, hc.competitor_id, c.name as competitor_name FROM heats h JOIN heat_competitors hc ON h.id = hc.heat_id JOIN competitors c ON hc.competitor_id = c.id WHERE h.round_id IN (SELECT id FROM rounds WHERE event_id = $1)', [eventId]);
-
     const rounds = roundsResult.rows;
-    const heats = heatsResult.rows;
 
-    res.status(200).json({ rounds, heats });
+    for (const round of rounds) {
+      const heatsResult = await pool.query('SELECT * FROM heats WHERE round_id = $1', [round.id]);
+      const heats = heatsResult.rows;
+
+      for (const heat of heats) {
+        const competitorsResult = await pool.query(
+          `SELECT c.*
+           FROM competitors c
+           JOIN heat_competitors hc ON hc.competitor_id = c.id
+           WHERE hc.heat_id = $1`, [heat.id]
+        );
+        heat.competitors = competitorsResult.rows;
+      }
+      round.heats = heats;
+    }
+
+    res.status(200).json({ rounds });
   } catch (error) {
     console.error('Error fetching rounds:', error);
     res.status(500).json({ message: 'Internal server error' });
