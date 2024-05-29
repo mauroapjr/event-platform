@@ -282,7 +282,16 @@ router.post('/save-rounds', async (req, res) => {
     await client.query('BEGIN');
 
     for (const round of rounds) {
-      const { name, category, sub_category, board_type, gender, age_category, heats } = round;
+      let { name, category, sub_category, board_type, gender, age_category, heats } = round;
+
+      // Trim values to ensure they fit within the character limit
+      name = name.substring(0, 50);
+      category = category.substring(0, 50);
+      sub_category = sub_category.substring(0, 50);
+      board_type = board_type.substring(0, 50);
+      gender = gender.substring(0, 50);
+      age_category = age_category.substring(0, 50);
+
       const roundResult = await client.query(
         'INSERT INTO rounds (event_id, round_name, category, sub_category, board_type, gender, age_category, round_date) VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP) RETURNING id',
         [eventId, name, category, sub_category, board_type, gender, age_category]
@@ -318,7 +327,6 @@ router.post('/save-rounds', async (req, res) => {
   }
 });
 
-
 // Get all rounds for an event
 router.get('/get-rounds/:eventId', async (req, res) => {
   const { eventId } = req.params;
@@ -349,6 +357,37 @@ router.get('/get-rounds/:eventId', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+// // Get all rounds for an event
+// router.get('/get-rounds/:eventId', async (req, res) => {
+//   const { eventId } = req.params;
+
+//   try {
+//     const roundsResult = await pool.query('SELECT * FROM rounds WHERE event_id = $1', [eventId]);
+//     const rounds = roundsResult.rows;
+
+//     for (const round of rounds) {
+//       const heatsResult = await pool.query('SELECT * FROM heats WHERE round_id = $1', [round.id]);
+//       const heats = heatsResult.rows;
+
+//       for (const heat of heats) {
+//         const competitorsResult = await pool.query(
+//           `SELECT c.*
+//            FROM competitors c
+//            JOIN heat_competitors hc ON hc.competitor_id = c.id
+//            WHERE hc.heat_id = $1`, [heat.id]
+//         );
+//         heat.competitors = competitorsResult.rows;
+//       }
+//       round.heats = heats;
+//     }
+
+//     res.status(200).json({ rounds });
+//   } catch (error) {
+//     console.error('Error fetching rounds:', error);
+//     res.status(500).json({ message: 'Internal server error' });
+//   }
+// });
 
 
 // Add Score

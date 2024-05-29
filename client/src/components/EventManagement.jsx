@@ -1550,25 +1550,18 @@ const EventManagement = () => {
       const response = await axios.get(
         `http://localhost:3000/event-admin/get-rounds/${eventId}`
       );
-      const { rounds } = response.data;
+      const fetchedRounds = response.data;
 
-      const processedRounds = rounds.map((round) => {
-        return {
-          ...round,
-          heats: round.heats.map((heat) => ({
-            ...heat,
-            competitors: heat.competitors.map((competitor) => ({
-              id: competitor.id,
-              name: competitor.name,
-              category: competitor.category,
-              sub_category: competitor.sub_category,
-              board_type: competitor.board_type,
-              gender: competitor.gender,
-              age_category: competitor.age_category,
-            })),
+      const processedRounds = fetchedRounds.map((round) => ({
+        ...round,
+        heats: round.heats.map((heat) => ({
+          ...heat,
+          competitors: heat.competitors.map((c) => ({
+            id: c.id,
+            name: c.name,
           })),
-        };
-      });
+        })),
+      }));
 
       setRounds(processedRounds);
     } catch (error) {
@@ -1655,10 +1648,10 @@ const EventManagement = () => {
     }
 
     const sourceHeatIndex = rounds.findIndex(
-      (round) => round.heats.find((heat) => heat.id === result.source.droppableId)
+      (round) => round.id === result.source.droppableId
     );
     const destinationHeatIndex = rounds.findIndex(
-      (round) => round.heats.find((heat) => heat.id === result.destination.droppableId)
+      (round) => round.id === result.destination.droppableId
     );
 
     if (sourceHeatIndex === -1 || destinationHeatIndex === -1) {
@@ -1668,40 +1661,22 @@ const EventManagement = () => {
     const sourceRound = rounds[sourceHeatIndex];
     const destinationRound = rounds[destinationHeatIndex];
 
-    const sourceHeat = sourceRound.heats.find(heat => heat.id === result.source.droppableId);
-    const destinationHeat = destinationRound.heats.find(heat => heat.id === result.destination.droppableId);
-
-    const [movedItem] = sourceHeat.competitors.splice(result.source.index, 1);
-    destinationHeat.competitors.splice(result.destination.index, 0, movedItem);
+    const [movedItem] = sourceRound.heats[result.source.index].competitors.splice(
+      result.source.index,
+      1
+    );
+    destinationRound.heats[result.destination.index].competitors.splice(
+      result.destination.index,
+      0,
+      movedItem
+    );
 
     const updatedRounds = rounds.map((round) => {
       if (round.id === sourceRound.id) {
-        return {
-          ...sourceRound,
-          heats: sourceRound.heats.map((heat) => {
-            if (heat.id === sourceHeat.id) {
-              return sourceHeat;
-            }
-            if (heat.id === destinationHeat.id) {
-              return destinationHeat;
-            }
-            return heat;
-          })
-        };
+        return sourceRound;
       }
       if (round.id === destinationRound.id) {
-        return {
-          ...destinationRound,
-          heats: destinationRound.heats.map((heat) => {
-            if (heat.id === sourceHeat.id) {
-              return sourceHeat;
-            }
-            if (heat.id === destinationHeat.id) {
-              return destinationHeat;
-            }
-            return heat;
-          })
-        };
+        return destinationRound;
       }
       return round;
     });
@@ -1965,7 +1940,7 @@ const EventManagement = () => {
                           <div
                             ref={provided.innerRef}
                             {...provided.droppableProps}
-                            className="list-group mb-4"
+                            className="list-group mb-2"
                           >
                             <h5>Heat {index + 1}</h5>
                             {heat.competitors.map((competitor, idx) => (
