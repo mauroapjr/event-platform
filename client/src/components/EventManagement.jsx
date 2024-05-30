@@ -1363,6 +1363,7 @@ const EventManagement = () => {
   const [competitors, setCompetitors] = useState([]);
   const [judges, setJudges] = useState([]);
   const [rounds, setRounds] = useState([]);
+  const [showRounds, setShowRounds] = useState(false);
   const [eventId, setEventId] = useState(null);
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
@@ -1565,6 +1566,8 @@ const EventManagement = () => {
       });
   
       setRounds(processedRounds);
+      setShowRounds(true);
+
     } catch (error) {
       console.error("Error fetching rounds:", error);
       alert("Error fetching rounds");
@@ -1717,325 +1720,329 @@ const EventManagement = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <h2>Manage Events</h2>
-      <form onSubmit={handleCreateEvent} className="mb-4">
-        <div className="form-group">
-          <label>Event Name:</label>
-          <input
-            type="text"
-            className="form-control"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group mt-3">
-          <label>Date:</label>
-          <input
-            type="date"
-            className="form-control"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group mt-3">
-          <label>Location:</label>
-          <input
-            type="text"
-            className="form-control"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit" className="btn btn-primary mt-3">
-          Create Event
-        </button>
-      </form>
+  <div className="container mt-5">
+    <h2>Manage Events</h2>
+    <form onSubmit={handleCreateEvent} className="mb-4">
+      <div className="form-group">
+        <label>Event Name:</label>
+        <input
+          type="text"
+          className="form-control"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+      </div>
+      <div className="form-group mt-3">
+        <label>Date:</label>
+        <input
+          type="date"
+          className="form-control"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          required
+        />
+      </div>
+      <div className="form-group mt-3">
+        <label>Location:</label>
+        <input
+          type="text"
+          className="form-control"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          required
+        />
+      </div>
+      <button type="submit" className="btn btn-primary mt-3">
+        Create Event
+      </button>
+    </form>
 
-      <h3>Existing Events</h3>
-      {events.length === 0 ? (
-        <p>No events available. Please create an event.</p>
-      ) : (
-        <ul className="list-group">
-          {events.map((event) => (
-            <li
-              key={event.id}
-              className={`list-group-item d-flex justify-content-between align-items-center ${
-                eventId === event.id ? "active" : ""
-              }`}
-              style={{ cursor: "pointer" }}
-              onClick={() => {
-                fetchCompetitors(event.id, event.name);
-                fetchJudges(event.id);
-              }}
+    <h3>Existing Events</h3>
+    {events.length === 0 ? (
+      <p>No events available. Please create an event.</p>
+    ) : (
+      <ul className="list-group">
+        {events.map((event) => (
+          <li
+            key={event.id}
+            className={`list-group-item d-flex justify-content-between align-items-center ${
+              eventId === event.id ? "active" : ""
+            }`}
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              fetchCompetitors(event.id, event.name);
+              fetchJudges(event.id);
+            }}
+          >
+            {event.name}
+            <button
+              className="btn btn-danger"
+              onClick={() => handleDeleteEvent(event.id)}
             >
-              {event.name}
+              Delete
+            </button>
+          </li>
+        ))}
+      </ul>
+    )}
+
+    {eventId ? (
+      <>
+        <h3>Manage Competitors for {selectedEventName}</h3>
+        <form onSubmit={handleAddCompetitor} className="mb-4">
+          <div className="form-group">
+            <label>Competitor Name:</label>
+            <input
+              type="text"
+              className="form-control"
+              value={competitorName}
+              onChange={(e) => setCompetitorName(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group mt-3">
+            <label>Category:</label>
+            <select
+              className="form-control"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              required
+            >
+              <option value="">Select Category</option>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group mt-3">
+            <label>Sub Category:</label>
+            <select
+              className="form-control"
+              value={subCategory}
+              onChange={(e) => setSubCategory(e.target.value)}
+              required
+            >
+              <option value="">Select Sub Category</option>
+              {subCategories.map((subCat) => (
+                <option key={subCat} value={subCat}>
+                  {subCat}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group mt-3">
+            <label>Board Type:</label>
+            <select
+              className="form-control"
+              value={boardType}
+              onChange={(e) => setBoardType(e.target.value)}
+              required
+            >
+              <option value="">Select Board Type</option>
+              {categories.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group mt-3">
+            <label>Gender:</label>
+            <select
+              className="form-control"
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              required
+            >
+              <option value="">Select Gender</option>
+              {subCategories.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group mt-3">
+            <label>Age Category:</label>
+            <select
+              className="form-control"
+              value={ageCategory}
+              onChange={(e) => setAgeCategory(e.target.value)}
+              required
+            >
+              <option value="">Select Age Category</option>
+              {ageCategories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button type="submit" className="btn btn-primary mt-3">
+            Add Competitor
+          </button>
+        </form>
+
+        <h3>Existing Competitors</h3>
+        <ul className="list-group">
+          {competitors.map((competitor) => (
+            <li
+              key={competitor.id}
+              className="list-group-item d-flex justify-content-between align-items-center"
+            >
+              {competitor.name} (Event: {selectedEventName}, Category:{" "}
+              {competitor.category}, Sub Category: {competitor.sub_category},
+              Board Type: {competitor.board_type}, Gender: {competitor.gender}
+              , Age Category: {competitor.age_category})
               <button
                 className="btn btn-danger"
-                onClick={() => handleDeleteEvent(event.id)}
+                onClick={() => handleDeleteCompetitor(competitor.id)}
               >
                 Delete
               </button>
             </li>
           ))}
         </ul>
-      )}
 
-      {eventId ? (
-        <>
-          <h3>Manage Competitors for {selectedEventName}</h3>
-          <form onSubmit={handleAddCompetitor} className="mb-4">
-            <div className="form-group">
-              <label>Competitor Name:</label>
-              <input
-                type="text"
-                className="form-control"
-                value={competitorName}
-                onChange={(e) => setCompetitorName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="form-group mt-3">
-              <label>Category:</label>
-              <select
-                className="form-control"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                required
-              >
-                <option value="">Select Category</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group mt-3">
-              <label>Sub Category:</label>
-              <select
-                className="form-control"
-                value={subCategory}
-                onChange={(e) => setSubCategory(e.target.value)}
-                required
-              >
-                <option value="">Select Sub Category</option>
-                {subCategories.map((subCat) => (
-                  <option key={subCat} value={subCat}>
-                    {subCat}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group mt-3">
-              <label>Board Type:</label>
-              <select
-                className="form-control"
-                value={boardType}
-                onChange={(e) => setBoardType(e.target.value)}
-                required
-              >
-                <option value="">Select Board Type</option>
-                {categories.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group mt-3">
-              <label>Gender:</label>
-              <select
-                className="form-control"
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
-                required
-              >
-                <option value="">Select Gender</option>
-                {subCategories.map((g) => (
-                  <option key={g} value={g}>
-                    {g}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group mt-3">
-              <label>Age Category:</label>
-              <select
-                className="form-control"
-                value={ageCategory}
-                onChange={(e) => setAgeCategory(e.target.value)}
-                required
-              >
-                <option value="">Select Age Category</option>
-                {ageCategories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <button type="submit" className="btn btn-primary mt-3">
-              Add Competitor
-            </button>
-          </form>
-
-          <h3>Existing Competitors</h3>
-          <ul className="list-group">
-            {competitors.map((competitor) => (
-              <li
-                key={competitor.id}
-                className="list-group-item d-flex justify-content-between align-items-center"
-              >
-                {competitor.name} (Event: {selectedEventName}, Category:{" "}
-                {competitor.category}, Sub Category: {competitor.sub_category},
-                Board Type: {competitor.board_type}, Gender: {competitor.gender}
-                , Age Category: {competitor.age_category})
-                <button
-                  className="btn btn-danger"
-                  onClick={() => handleDeleteCompetitor(competitor.id)}
-                >
-                  Delete
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          <h3>Manage Judges for {selectedEventName}</h3>
-          <form onSubmit={handleAddJudge} className="mb-4">
-            <div className="form-group">
-              <label>Judge Name:</label>
-              <input
-                type="text"
-                className="form-control"
-                value={judgeName}
-                onChange={(e) => setJudgeName(e.target.value)}
-                required
-              />
-            </div>
-            <button type="submit" className="btn btn-primary mt-3">
-              Add Judge
-            </button>
-          </form>
-
-          <h3>Existing Judges</h3>
-          <ul className="list-group">
-            {judges.map((judge) => (
-              <li
-                key={judge.id}
-                className="list-group-item d-flex justify-content-between align-items-center"
-              >
-                {judge.name} (Event: {selectedEventName})
-                <button
-                  className="btn btn-danger"
-                  onClick={() => handleDeleteJudge(judge.id)}
-                >
-                  Delete
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          <h3>Rounds</h3>
-          <button className="btn btn-primary mb-0" onClick={handleCreateRounds}>
-            Create Rounds
+        <h3>Manage Judges for {selectedEventName}</h3>
+        <form onSubmit={handleAddJudge} className="mb-4">
+          <div className="form-group">
+            <label>Judge Name:</label>
+            <input
+              type="text"
+              className="form-control"
+              value={judgeName}
+              onChange={(e) => setJudgeName(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="btn btn-primary mt-3">
+            Add Judge
           </button>
-          <button className="btn btn-success mt-0" onClick={handleSaveRounds}>
-            Save Rounds
-          </button>
-          <button className="btn btn-info mt-0" onClick={handleFetchRounds}>
-            Show All Rounds
-          </button>
-          <button
-            className="btn btn-secondary mt-0"
-            onClick={handleGeneratePDF}
-          >
-            Generate PDF
-          </button>
+        </form>
 
-          <DragDropContext onDragEnd={handleDragEnd}>
-            {rounds.map((round) => (
-              <Droppable droppableId={round.id} key={round.id}>
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className="mb-4"
-                  >
-                    <h4>{round.name}</h4>
-                    {round.heats.map((heat, index) => (
-                      <div key={heat.id}>
-                        <h5>Heat {index + 1}</h5>
-                        <Droppable droppableId={heat.id}>
-                          {(provided) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.droppableProps}
-                              className="list-group"
-                            >
-                              {heat.competitors.map((competitor, idx) => (
-                                <Draggable
-                                  key={competitor.id}
-                                  draggableId={competitor.id.toString()}
-                                  index={idx}
-                                >
-                                  {(provided) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      className="list-group-item"
-                                    >
-                                      {competitor.name}
-                                    </div>
-                                  )}
-                                </Draggable>
-                              ))}
-                              {provided.placeholder}
-                            </div>
-                          )}
-                        </Droppable>
-                      </div>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            ))}
-          </DragDropContext>
-
-          <h3>Rounds for {selectedEventName}</h3>
-          {rounds.map((round, roundIndex) => (
-            <div key={roundIndex} className="mb-4">
-              <h4>
-                Round {roundIndex + 1} ({round.category}, {round.sub_category},{" "}
-                {round.board_type}, {round.gender}, {round.age_category})
-              </h4>
-              {round.heats.map((heat, heatIndex) => (
-                <div key={heatIndex} className="mb-2">
-                  <h5>Heat {heatIndex + 1}</h5>
-                  <ul className="list-group">
-                    {heat.competitors.map((competitor, competitorIndex) => (
-                      <li key={competitorIndex} className="list-group-item">
-                        {competitor.name}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
+        <h3>Existing Judges</h3>
+        <ul className="list-group">
+          {judges.map((judge) => (
+            <li
+              key={judge.id}
+              className="list-group-item d-flex justify-content-between align-items-center"
+            >
+              {judge.name} (Event: {selectedEventName})
+              <button
+                className="btn btn-danger"
+                onClick={() => handleDeleteJudge(judge.id)}
+              >
+                Delete
+              </button>
+            </li>
           ))}
-        </>
-      ) : (
-        <p className="mt-4">
-          Please select an event to manage competitors and judges.
-        </p>
-      )}
-    </div>
-  );
+        </ul>
+
+        <h3>Rounds</h3>
+        <button className="btn btn-primary mb-0" onClick={handleCreateRounds}>
+          Create Rounds
+        </button>
+        <button className="btn btn-success mt-0" onClick={handleSaveRounds}>
+          Save Rounds
+        </button>
+        <button className="btn btn-info mt-0" onClick={handleFetchRounds}>
+          Show All Rounds
+        </button>
+        <button
+          className="btn btn-secondary mt-0"
+          onClick={handleGeneratePDF}
+        >
+          Generate PDF
+        </button>
+
+       
+            <DragDropContext onDragEnd={handleDragEnd}>
+              {rounds.map((round) => (
+                <Droppable droppableId={round.id} key={round.id}>
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="mb-4"
+                    >
+                      <h4>{round.name}</h4>
+                      {round.heats.map((heat, index) => (
+                        <div key={heat.id}>
+                          <h5>Heat {index + 1}</h5>
+                          <Droppable droppableId={heat.id}>
+                            {(provided) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.droppableProps}
+                                className="list-group"
+                              >
+                                {heat.competitors.map((competitor, idx) => (
+                                  <Draggable
+                                    key={competitor.id}
+                                    draggableId={competitor.id.toString()}
+                                    index={idx}
+                                  >
+                                    {(provided) => (
+                                      <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        className="list-group-item"
+                                      >
+                                        {competitor.name}
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                ))}
+                                {provided.placeholder}
+                              </div>
+                            )}
+                          </Droppable>
+                        </div>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              ))}
+            </DragDropContext>
+ {showRounds && (
+          <>
+            <h3>Rounds for {selectedEventName}</h3>
+            {rounds.map((round, roundIndex) => (
+              <div key={roundIndex} className="mb-4">
+                <h4>
+                  Round {roundIndex + 1} ({round.category}, {round.sub_category},{" "}
+                  {round.board_type}, {round.gender}, {round.age_category})
+                </h4>
+                {round.heats.map((heat, heatIndex) => (
+                  <div key={heatIndex} className="mb-2">
+                    <h5>Heat {heatIndex + 1}</h5>
+                    <ul className="list-group">
+                      {heat.competitors.map((competitor, competitorIndex) => (
+                        <li key={competitorIndex} className="list-group-item">
+                          {competitor.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </>
+        )}
+      </>
+    ) : (
+      <p className="mt-4">
+        Please select an event to manage competitors and judges.
+      </p>
+    )}
+  </div>
+);
 };
 
 export default EventManagement;
