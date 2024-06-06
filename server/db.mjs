@@ -20,7 +20,12 @@ const pool = new Pool({
   database: 'dbEventPlatform', 
   password: 'password123',  
   port: 5432,  
+  ssl: {
+    rejectUnauthorized: false 
+  },
 });
 
 export default pool;
+
+
 
