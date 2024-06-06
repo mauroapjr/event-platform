@@ -1533,46 +1533,63 @@ const EventManagement = () => {
             age_category: round.age_category,
             heats: round.heats.map((heat) => ({
               heat_name: heat.name,
-              competitors: heat.competitors,
+              competitors: heat.competitors.map((competitor) => ({
+                id: competitor.id,
+                name: competitor.name,
+              })),
             })),
           })),
         }
       );
+  
+      console.log("Rounds and heats saved successfully:", response.data);
       alert("Rounds saved successfully");
     } catch (error) {
       console.error("Error saving rounds:", error);
       alert("Error saving rounds");
     }
   };
+  
 
   const handleFetchRounds = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/event-admin/get-rounds/${eventId}`
-      );
-      const rounds = response.data;
-  
-      const processedRounds = rounds.map((round) => {
-        return {
-          ...round,
-          heats: round.heats.map((heat) => ({
+  try {
+    console.log("Fetching rounds for event ID:", eventId);
+    const response = await axios.get(
+      `http://localhost:3000/event-admin/get-rounds/${eventId}`
+    );
+    console.log("Response received from server:", response);
+
+    const rounds = response.data;
+    console.log("Rounds data:", rounds);
+
+    const processedRounds = rounds.map((round) => {
+      console.log("Processing round:", round);
+      return {
+        ...round,
+        heats: round.heats.map((heat) => {
+          console.log("Processing heat:", heat);
+          return {
             ...heat,
             competitors: heat.competitors.map((competitor) => ({
               id: competitor.id,
               name: competitor.name,
             })),
-          })),
-        };
-      });
-  
-      setRounds(processedRounds);
-      setShowRounds(true);
+          };
+        }),
+      };
+    });
 
-    } catch (error) {
-      console.error("Error fetching rounds:", error);
-      alert("Error fetching rounds");
-    }
-  };
+    console.log("Processed rounds:", processedRounds);
+    setRounds(processedRounds);
+    setShowRounds(true);
+  } catch (error) {
+    console.error("Error fetching rounds:", error);
+    alert("Error fetching rounds");
+  }
+};
+
+
+  
 
   // const handleFetchRounds = async () => {
   //   try {

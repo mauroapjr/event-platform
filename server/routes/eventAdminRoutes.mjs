@@ -277,28 +277,34 @@ router.get("/get-heat-competitors/:heat_id", async (req, res) => {
 router.post('/save-rounds', async (req, res) => {
   const { eventId, rounds } = req.body;
 
+  console.log("Saving rounds for event:", eventId);
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
 
     for (const round of rounds) {
       const { name, category, sub_category, board_type, gender, age_category, heats } = round;
+      console.log("Saving round:", name);
       const roundResult = await client.query(
         'INSERT INTO rounds (event_id, round_name, category, sub_category, board_type, gender, age_category, round_date) VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP) RETURNING id',
         [eventId, name, category, sub_category, board_type, gender, age_category]
       );
 
       const roundId = roundResult.rows[0].id;
+      console.log("Round saved with ID:", roundId);
 
       for (const heat of heats) {
+        console.log("Saving heat:", heat.heat_name);
         const heatResult = await client.query(
           'INSERT INTO heats (round_id, heat_name) VALUES ($1, $2) RETURNING id',
           [roundId, heat.heat_name]
         );
 
         const heatId = heatResult.rows[0].id;
+        console.log("Heat saved with ID:", heatId);
 
         for (const competitor of heat.competitors) {
+          console.log("Saving competitor:", competitor.id);
           await client.query(
             'INSERT INTO heat_competitors (heat_id, competitor_id) VALUES ($1, $2)',
             [heatId, competitor.id]
@@ -308,6 +314,7 @@ router.post('/save-rounds', async (req, res) => {
     }
 
     await client.query('COMMIT');
+    console.log("All rounds and heats saved successfully");
     res.status(200).json({ message: 'Rounds saved successfully' });
   } catch (error) {
     await client.query('ROLLBACK');
@@ -317,6 +324,7 @@ router.post('/save-rounds', async (req, res) => {
     client.release();
   }
 });
+
 
 // Get all rounds for an event
 router.get('/get-rounds/:eventId', async (req, res) => {
@@ -329,6 +337,7 @@ router.get('/get-rounds/:eventId', async (req, res) => {
     for (const round of rounds) {
       const heatsResult = await pool.query('SELECT * FROM heats WHERE round_id = $1', [round.id]);
       const heats = heatsResult.rows;
+      console.log('Fetched heats:', heats);
 
       for (const heat of heats) {
         const competitorsResult = await pool.query(
@@ -338,16 +347,19 @@ router.get('/get-rounds/:eventId', async (req, res) => {
            WHERE hc.heat_id = $1`, [heat.id]
         );
         heat.competitors = competitorsResult.rows;
+        console.log('Fetched competitors for heat:', heat.id, competitorsResult.rows);
       }
       round.heats = heats;
     }
 
+    console.log('Fetched rounds:', rounds);
     res.status(200).json(rounds);
   } catch (error) {
     console.error('Error fetching rounds:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 // Add Score
 router.post("/add-score", async (req, res) => {
