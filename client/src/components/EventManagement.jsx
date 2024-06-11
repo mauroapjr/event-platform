@@ -322,47 +322,133 @@ const EventManagement = () => {
     console.log("Created rounds:", newRounds);
   };
 
-  const handleDragEnd = (result) => {
+  const handleDragEnd = async (result) => {
     if (!result.destination) {
       return;
     }
-
-    const sourceHeatIndex = rounds.findIndex((round) =>
+  
+    const sourceRoundIndex = rounds.findIndex((round) =>
       round.heats.some((heat) => heat.id === result.source.droppableId)
     );
-    const destinationHeatIndex = rounds.findIndex((round) =>
+    const destinationRoundIndex = rounds.findIndex((round) =>
       round.heats.some((heat) => heat.id === result.destination.droppableId)
     );
-
+  
+    if (sourceRoundIndex === -1 || destinationRoundIndex === -1) {
+      return;
+    }
+  
+    const sourceRound = rounds[sourceRoundIndex];
+    const destinationRound = rounds[destinationRoundIndex];
+  
+    const sourceHeatIndex = sourceRound.heats.findIndex(
+      (heat) => heat.id === result.source.droppableId
+    );
+    const destinationHeatIndex = destinationRound.heats.findIndex(
+      (heat) => heat.id === result.destination.droppableId
+    );
+  
     if (sourceHeatIndex === -1 || destinationHeatIndex === -1) {
       return;
     }
-
-    const sourceRound = rounds[sourceHeatIndex];
-    const destinationRound = rounds[destinationHeatIndex];
-
-    const sourceHeat = sourceRound.heats.find(
-      (heat) => heat.id === result.source.droppableId
-    );
-    const destinationHeat = destinationRound.heats.find(
-      (heat) => heat.id === result.destination.droppableId
-    );
-
+  
+    const sourceHeat = sourceRound.heats[sourceHeatIndex];
+    const destinationHeat = destinationRound.heats[destinationHeatIndex];
+  
     const [movedItem] = sourceHeat.competitors.splice(result.source.index, 1);
     destinationHeat.competitors.splice(result.destination.index, 0, movedItem);
-
+  
     const updatedRounds = rounds.map((round) => {
       if (round.id === sourceRound.id) {
-        return sourceRound;
+        return {
+          ...round,
+          heats: round.heats.map((heat) => {
+            if (heat.id === sourceHeat.id) {
+              return { ...sourceHeat };
+            }
+            if (heat.id === destinationHeat.id) {
+              return { ...destinationHeat };
+            }
+            return heat;
+          }),
+        };
       }
       if (round.id === destinationRound.id) {
-        return destinationRound;
+        return {
+          ...round,
+          heats: round.heats.map((heat) => {
+            if (heat.id === sourceHeat.id) {
+              return { ...sourceHeat };
+            }
+            if (heat.id === destinationHeat.id) {
+              return { ...destinationHeat };
+            }
+            return heat;
+          }),
+        };
       }
       return round;
     });
-
+  
     setRounds(updatedRounds);
+  
+    // Send the update to the backend
+    try {
+      await axios.post('http://localhost:3000/event-admin/move-competitor', {
+        fromHeatId: result.source.droppableId,
+        toHeatId: result.destination.droppableId,
+        competitorId: movedItem.id,
+      });
+    } catch (error) {
+      console.error('Error moving competitor:', error);
+      // Optionally, revert the state change if the backend update fails
+      setRounds(rounds);
+    }
   };
+  
+  
+
+  // const handleDragEnd = (result) => {
+  //   if (!result.destination) {
+  //     return;
+  //   }
+
+  //   const sourceHeatIndex = rounds.findIndex((round) =>
+  //     round.heats.some((heat) => heat.id === result.source.droppableId)
+  //   );
+  //   const destinationHeatIndex = rounds.findIndex((round) =>
+  //     round.heats.some((heat) => heat.id === result.destination.droppableId)
+  //   );
+
+  //   if (sourceHeatIndex === -1 || destinationHeatIndex === -1) {
+  //     return;
+  //   }
+
+  //   const sourceRound = rounds[sourceHeatIndex];
+  //   const destinationRound = rounds[destinationHeatIndex];
+
+  //   const sourceHeat = sourceRound.heats.find(
+  //     (heat) => heat.id === result.source.droppableId
+  //   );
+  //   const destinationHeat = destinationRound.heats.find(
+  //     (heat) => heat.id === result.destination.droppableId
+  //   );
+
+  //   const [movedItem] = sourceHeat.competitors.splice(result.source.index, 1);
+  //   destinationHeat.competitors.splice(result.destination.index, 0, movedItem);
+
+  //   const updatedRounds = rounds.map((round) => {
+  //     if (round.id === sourceRound.id) {
+  //       return sourceRound;
+  //     }
+  //     if (round.id === destinationRound.id) {
+  //       return destinationRound;
+  //     }
+  //     return round;
+  //   });
+
+  //   setRounds(updatedRounds);
+  // };
 
   return (
     <div className="container mt-5">
