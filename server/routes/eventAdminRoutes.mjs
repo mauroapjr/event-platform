@@ -327,38 +327,149 @@ router.post('/save-rounds', async (req, res) => {
 
 
 // Get all rounds for an event
+// Get all rounds for an event
 router.get('/get-rounds/:eventId', async (req, res) => {
   const { eventId } = req.params;
 
   try {
+    // Fetch rounds
     const roundsResult = await pool.query('SELECT * FROM rounds WHERE event_id = $1', [eventId]);
     const rounds = roundsResult.rows;
+    console.log('Fetched rounds:', rounds);
 
     for (const round of rounds) {
+      // Fetch heats for each round
       const heatsResult = await pool.query('SELECT * FROM heats WHERE round_id = $1', [round.id]);
       const heats = heatsResult.rows;
-      console.log('Fetched heats:', heats);
+      console.log('Fetched heats for round', round.id, ':', heats);
 
       for (const heat of heats) {
+        // Fetch competitors for each heat
         const competitorsResult = await pool.query(
-          `SELECT c.*
+          `SELECT c.id, c.name 
            FROM competitors c
            JOIN heat_competitors hc ON hc.competitor_id = c.id
-           WHERE hc.heat_id = $1`, [heat.id]
+           WHERE hc.heat_id = $1`, 
+          [heat.id]
         );
         heat.competitors = competitorsResult.rows;
-        console.log('Fetched competitors for heat:', heat.id, competitorsResult.rows);
+        console.log('Fetched competitors for heat', heat.id, ':', heat.competitors);
       }
       round.heats = heats;
     }
 
-    console.log('Fetched rounds:', rounds);
+    console.log('Fetched rounds with details:', JSON.stringify(rounds, null, 2));
     res.status(200).json(rounds);
   } catch (error) {
     console.error('Error fetching rounds:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+
+
+// router.get('/get-rounds/:eventId', async (req, res) => {
+//   const { eventId } = req.params;
+
+//   try {
+//     // Fetch rounds, heats, and competitors
+//     const roundsResult = await pool.query(`
+//       SELECT r.id AS round_id, r.round_name, r.category, r.sub_category, r.board_type, r.gender, r.age_category,
+//              h.id AS heat_id, h.heat_name, c.id AS competitor_id, c.name AS competitor_name
+//       FROM rounds r
+//       LEFT JOIN heats h ON r.id = h.round_id
+//       LEFT JOIN heat_competitors hc ON h.id = hc.heat_id
+//       LEFT JOIN competitors c ON hc.competitor_id = c.id
+//       WHERE r.event_id = $1
+//       ORDER BY r.id, h.id, c.id
+//     `, [eventId]);
+
+//     const roundMap = {};
+
+//     roundsResult.rows.forEach(row => {
+//       if (!roundMap[row.round_id]) {
+//         roundMap[row.round_id] = {
+//           id: row.round_id,
+//           name: row.round_name,
+//           category: row.category,
+//           sub_category: row.sub_category,
+//           board_type: row.board_type,
+//           gender: row.gender,
+//           age_category: row.age_category,
+//           heats: []
+//         };
+//       }
+
+//       const round = roundMap[row.round_id];
+
+//       if (row.heat_id) {
+//         let heat = round.heats.find(h => h.id === row.heat_id);
+
+//         if (!heat) {
+//           heat = {
+//             id: row.heat_id,
+//             name: row.heat_name,
+//             competitors: []
+//           };
+//           round.heats.push(heat);
+//         }
+
+//         if (row.competitor_id) {
+//           heat.competitors.push({
+//             id: row.competitor_id,
+//             name: row.competitor_name
+//           });
+//         }
+//       }
+//     });
+
+//     const rounds = Object.values(roundMap);
+//     console.log('Fetched rounds with details:', JSON.stringify(rounds, null, 2));
+//     res.status(200).json(rounds);
+//   } catch (error) {
+//     console.error('Error fetching rounds:', error);
+//     res.status(500).json({ message: 'Internal server error' });
+//   }
+// });
+
+
+
+
+
+
+// // Get all rounds for an event
+// router.get('/get-rounds/:eventId', async (req, res) => {
+//   const { eventId } = req.params;
+
+//   try {
+//     const roundsResult = await pool.query('SELECT * FROM rounds WHERE event_id = $1', [eventId]);
+//     const rounds = roundsResult.rows;
+
+//     for (const round of rounds) {
+//       const heatsResult = await pool.query('SELECT * FROM heats WHERE round_id = $1', [round.id]);
+//       const heats = heatsResult.rows;
+//       console.log('Fetched heats:', heats);
+
+//       for (const heat of heats) {
+//         const competitorsResult = await pool.query(
+//           `SELECT c.*
+//            FROM competitors c
+//            JOIN heat_competitors hc ON hc.competitor_id = c.id
+//            WHERE hc.heat_id = $1`, [heat.id]
+//         );
+//         heat.competitors = competitorsResult.rows;
+//         console.log('Fetched competitors for heat:', heat.id, competitorsResult.rows);
+//       }
+//       round.heats = heats;
+//     }
+
+//     console.log('Fetched rounds:', rounds);
+//     res.status(200).json(rounds);
+//   } catch (error) {
+//     console.error('Error fetching rounds:', error);
+//     res.status(500).json({ message: 'Internal server error' });
+//   }
+// });
 
 
 // Add Score
@@ -425,27 +536,11 @@ router.post("/advance-competitors", async (req, res) => {
   }
 });
 
-// Generate PDF
-router.get('/generate-rounds-pdf/:eventId', async (req, res) => {
-  const { eventId } = req.params;
+// Endpoint to generate PDF using saved rounds data
+router.post('/generate-rounds-pdf', async (req, res) => {
+  const { eventId, rounds } = req.body;
 
   try {
-    const roundsResult = await pool.query(
-      'SELECT * FROM rounds WHERE event_id = $1',
-      [eventId]
-    );
-    const rounds = roundsResult.rows;
-
-    const heatsResult = await pool.query(
-      `SELECT h.*, c.name AS competitor_name 
-       FROM heats h 
-       JOIN heat_competitors hc ON h.id = hc.heat_id 
-       JOIN competitors c ON hc.competitor_id = c.id 
-       WHERE h.round_id IN (SELECT id FROM rounds WHERE event_id = $1)`,
-      [eventId]
-    );
-    const heats = heatsResult.rows;
-
     const doc = new PDFDocument();
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename=rounds.pdf');
@@ -455,7 +550,7 @@ router.get('/generate-rounds-pdf/:eventId', async (req, res) => {
     doc.moveDown();
 
     for (const round of rounds) {
-      doc.fontSize(16).text(`Round ${round.id}`, { align: 'left' });
+      doc.fontSize(16).text(`Round: ${round.name}`, { align: 'left' });
       doc.fontSize(12).text(`Category: ${round.category}`, { align: 'left' });
       doc.fontSize(12).text(`Sub Category: ${round.sub_category}`, { align: 'left' });
       doc.fontSize(12).text(`Board Type: ${round.board_type}`, { align: 'left' });
@@ -463,13 +558,11 @@ router.get('/generate-rounds-pdf/:eventId', async (req, res) => {
       doc.fontSize(12).text(`Age Category: ${round.age_category}`, { align: 'left' });
       doc.moveDown();
 
-      const roundHeats = heats.filter(h => h.round_id === round.id);
-      for (const heat of roundHeats) {
-        doc.fontSize(14).text(`Heat ${heat.id}`, { align: 'left' });
+      for (const heat of round.heats) {
+        doc.fontSize(14).text(`Heat: ${heat.name}`, { align: 'left' });
         doc.fontSize(12).text(`Competitors:`, { align: 'left' });
-        const competitors = heats.filter(h => h.heat_id === heat.id);
-        competitors.forEach((comp, idx) => {
-          doc.fontSize(12).text(`${idx + 1}. ${comp.competitor_name}`, { align: 'left' });
+        heat.competitors.forEach((competitor, idx) => {
+          doc.fontSize(12).text(`${idx + 1}. ${competitor.name}`, { align: 'left' });
         });
         doc.moveDown();
       }
@@ -494,7 +587,11 @@ router.get('/generate-rounds-pdf/:eventId', async (req, res) => {
 //     const rounds = roundsResult.rows;
 
 //     const heatsResult = await pool.query(
-//       'SELECT h.*, c.name AS competitor_name FROM heats h JOIN heat_competitors hc ON h.id = hc.heat_id JOIN competitors c ON hc.competitor_id = c.id WHERE h.round_id IN (SELECT id FROM rounds WHERE event_id = $1)',
+//       `SELECT h.*, c.name AS competitor_name 
+//        FROM heats h 
+//        JOIN heat_competitors hc ON h.id = hc.heat_id 
+//        JOIN competitors c ON hc.competitor_id = c.id 
+//        WHERE h.round_id IN (SELECT id FROM rounds WHERE event_id = $1)`,
 //       [eventId]
 //     );
 //     const heats = heatsResult.rows;
@@ -535,4 +632,6 @@ router.get('/generate-rounds-pdf/:eventId', async (req, res) => {
 //   }
 // });
 
+
 export default router;
+
