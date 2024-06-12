@@ -3,6 +3,8 @@ import axios from "axios";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import "bootstrap/dist/css/bootstrap.min.css";
 import RoundsDisplay from "./RoundsDisplay";
+import EventsList from "./EventsList"; 
+
 
 
 const categories = ["Shortboard", "Longboard"];
@@ -47,14 +49,23 @@ const EventManagement = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:3000/event-admin/get-events"
-      );
+      const response = await axios.get("http://localhost:3000/event-admin/get-events");
       setEvents(response.data);
     } catch (error) {
       console.error("Error fetching events:", error);
     }
   };
+
+  // const fetchEvents = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       "http://localhost:3000/event-admin/get-events"
+  //     );
+  //     setEvents(response.data);
+  //   } catch (error) {
+  //     console.error("Error fetching events:", error);
+  //   }
+  // };
 
   const fetchCompetitors = async (eventId, eventName) => {
     try {
@@ -210,48 +221,7 @@ const EventManagement = () => {
       alert("Error saving rounds");
     }
   };
-
-  // const handleFetchRounds = async () => {
-  //   try {
-  //     const response = await axios.get(
-  //       `http://localhost:3000/event-admin/get-rounds/${eventId}`
-  //     );
-  
-  //     const roundsData = response.data;
-  //     console.log("Fetched rounds data:", JSON.stringify(roundsData, null, 2));
-  
-  //     if (!roundsData || !Array.isArray(roundsData)) {
-  //       throw new Error("Invalid rounds data");
-  //     }
-  
-  //     const processedRounds = roundsData.map((round) => ({
-  //       id: round.id,
-  //       name: round.round_name,
-  //       category: round.category,
-  //       sub_category: round.sub_category,
-  //       board_type: round.board_type,
-  //       gender: round.gender,
-  //       age_category: round.age_category,
-  //       heats: (round.heats || []).map((heat) => ({
-  //         id: heat.id,
-  //         name: heat.heat_name,
-  //         competitors: (heat.competitors || []).map((competitor) => ({
-  //           id: competitor.id,
-  //           name: competitor.name,
-  //         })),
-  //       })),
-  //     }));
-  
-  //     console.log("Processed rounds:", JSON.stringify(processedRounds, null, 2));
-  //     setRounds(processedRounds);
-  //     setShowRounds(true);
-  //   } catch (error) {
-  //     console.error("Error fetching rounds:", error);
-  //     alert("Error fetching rounds");
-  //   }
-  // };
-  
-    
+   
   const handleGeneratePDF = async () => {
     try {
       const response = await axios.post(
@@ -322,81 +292,57 @@ const EventManagement = () => {
     console.log("Created rounds:", newRounds);
   };
 
+  
+  
   const handleDragEnd = async (result) => {
     if (!result.destination) {
       return;
     }
-  
+
+    const sourceHeatId = result.source.droppableId.split('-')[1];
+    const destinationHeatId = result.destination.droppableId.split('-')[1];
+
     const sourceRoundIndex = rounds.findIndex((round) =>
-      round.heats.some((heat) => heat.id === result.source.droppableId)
+      round.heats.some((heat) => heat.id === parseInt(sourceHeatId))
     );
     const destinationRoundIndex = rounds.findIndex((round) =>
-      round.heats.some((heat) => heat.id === result.destination.droppableId)
+      round.heats.some((heat) => heat.id === parseInt(destinationHeatId))
     );
-  
+
     if (sourceRoundIndex === -1 || destinationRoundIndex === -1) {
       return;
     }
-  
+
     const sourceRound = rounds[sourceRoundIndex];
     const destinationRound = rounds[destinationRoundIndex];
-  
-    const sourceHeatIndex = sourceRound.heats.findIndex(
-      (heat) => heat.id === result.source.droppableId
+
+    const sourceHeat = sourceRound.heats.find(
+      (heat) => heat.id === parseInt(sourceHeatId)
     );
-    const destinationHeatIndex = destinationRound.heats.findIndex(
-      (heat) => heat.id === result.destination.droppableId
+    const destinationHeat = destinationRound.heats.find(
+      (heat) => heat.id === parseInt(destinationHeatId)
     );
-  
-    if (sourceHeatIndex === -1 || destinationHeatIndex === -1) {
-      return;
-    }
-  
-    const sourceHeat = sourceRound.heats[sourceHeatIndex];
-    const destinationHeat = destinationRound.heats[destinationHeatIndex];
-  
+
     const [movedItem] = sourceHeat.competitors.splice(result.source.index, 1);
     destinationHeat.competitors.splice(result.destination.index, 0, movedItem);
-  
+
     const updatedRounds = rounds.map((round) => {
       if (round.id === sourceRound.id) {
-        return {
-          ...round,
-          heats: round.heats.map((heat) => {
-            if (heat.id === sourceHeat.id) {
-              return { ...sourceHeat };
-            }
-            if (heat.id === destinationHeat.id) {
-              return { ...destinationHeat };
-            }
-            return heat;
-          }),
-        };
+        return sourceRound;
       }
       if (round.id === destinationRound.id) {
-        return {
-          ...round,
-          heats: round.heats.map((heat) => {
-            if (heat.id === sourceHeat.id) {
-              return { ...sourceHeat };
-            }
-            if (heat.id === destinationHeat.id) {
-              return { ...destinationHeat };
-            }
-            return heat;
-          }),
-        };
+        return destinationRound;
       }
       return round;
     });
-  
+
     setRounds(updatedRounds);
-  
+
     // Send the update to the backend
     try {
       await axios.post('http://localhost:3000/event-admin/move-competitor', {
-        fromHeatId: result.source.droppableId,
-        toHeatId: result.destination.droppableId,
+        fromHeatId: sourceHeatId,
+        toHeatId: destinationHeatId,
         competitorId: movedItem.id,
       });
     } catch (error) {
@@ -405,50 +351,6 @@ const EventManagement = () => {
       setRounds(rounds);
     }
   };
-  
-  
-
-  // const handleDragEnd = (result) => {
-  //   if (!result.destination) {
-  //     return;
-  //   }
-
-  //   const sourceHeatIndex = rounds.findIndex((round) =>
-  //     round.heats.some((heat) => heat.id === result.source.droppableId)
-  //   );
-  //   const destinationHeatIndex = rounds.findIndex((round) =>
-  //     round.heats.some((heat) => heat.id === result.destination.droppableId)
-  //   );
-
-  //   if (sourceHeatIndex === -1 || destinationHeatIndex === -1) {
-  //     return;
-  //   }
-
-  //   const sourceRound = rounds[sourceHeatIndex];
-  //   const destinationRound = rounds[destinationHeatIndex];
-
-  //   const sourceHeat = sourceRound.heats.find(
-  //     (heat) => heat.id === result.source.droppableId
-  //   );
-  //   const destinationHeat = destinationRound.heats.find(
-  //     (heat) => heat.id === result.destination.droppableId
-  //   );
-
-  //   const [movedItem] = sourceHeat.competitors.splice(result.source.index, 1);
-  //   destinationHeat.competitors.splice(result.destination.index, 0, movedItem);
-
-  //   const updatedRounds = rounds.map((round) => {
-  //     if (round.id === sourceRound.id) {
-  //       return sourceRound;
-  //     }
-  //     if (round.id === destinationRound.id) {
-  //       return destinationRound;
-  //     }
-  //     return round;
-  //   });
-
-  //   setRounds(updatedRounds);
-  // };
 
   return (
     <div className="container mt-5">
