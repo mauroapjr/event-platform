@@ -11,7 +11,7 @@ const RoundsDisplay = ({ eventId }) => {
       );
       const roundsData = response.data;
       console.log("Rounds data:", roundsData);
-      
+
       const processedRounds = roundsData.map((round) => ({
         id: round.id,
         name: round.round_name,
@@ -33,7 +33,9 @@ const RoundsDisplay = ({ eventId }) => {
       console.log("Processed rounds:", processedRounds);
 
       // Filter only rounds with heats
-      const roundsWithHeats = processedRounds.filter(round => round.heats.length > 0);
+      const roundsWithHeats = processedRounds.filter(
+        (round) => round.heats.length > 0
+      );
 
       setRounds(roundsWithHeats);
     } catch (error) {
@@ -74,5 +76,3 @@ const RoundsDisplay = ({ eventId }) => {
 };
 
 export default RoundsDisplay;
-
-

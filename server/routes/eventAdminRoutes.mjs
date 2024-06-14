@@ -1,8 +1,8 @@
 import express from "express";
 import pool from "../db.mjs";
-import Pool  from 'pg';
+import Pool from "pg";
 
-import PDFDocument from 'pdfkit';
+import PDFDocument from "pdfkit";
 
 const router = express.Router();
 
@@ -274,45 +274,67 @@ router.get("/get-heat-competitors/:heat_id", async (req, res) => {
 });
 
 // Move Competitor to Another Heat
-router.post('/move-competitor', async (req, res) => {
+router.post("/move-competitor", async (req, res) => {
   const { fromHeatId, toHeatId, competitorId } = req.body;
 
   const client = await pool.connect();
   try {
-    await client.query('BEGIN');
-    
-    // Remove competitor from the old heat
-    await client.query('DELETE FROM heat_competitors WHERE heat_id = $1 AND competitor_id = $2', [fromHeatId, competitorId]);
-    
-    // Add competitor to the new heat
-    await client.query('INSERT INTO heat_competitors (heat_id, competitor_id) VALUES ($1, $2)', [toHeatId, competitorId]);
+    await client.query("BEGIN");
 
-    await client.query('COMMIT');
-    res.status(200).json({ message: 'Competitor moved successfully' });
+    // Remove competitor from the old heat
+    await client.query(
+      "DELETE FROM heat_competitors WHERE heat_id = $1 AND competitor_id = $2",
+      [fromHeatId, competitorId]
+    );
+
+    // Add competitor to the new heat
+    await client.query(
+      "INSERT INTO heat_competitors (heat_id, competitor_id) VALUES ($1, $2)",
+      [toHeatId, competitorId]
+    );
+
+    await client.query("COMMIT");
+    res.status(200).json({ message: "Competitor moved successfully" });
   } catch (error) {
-    await client.query('ROLLBACK');
-    console.error('Error moving competitor:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    await client.query("ROLLBACK");
+    console.error("Error moving competitor:", error);
+    res.status(500).json({ message: "Internal server error" });
   } finally {
     client.release();
   }
 });
 
 // Save rounds and heats to the database
-router.post('/save-rounds', async (req, res) => {
+router.post("/save-rounds", async (req, res) => {
   const { eventId, rounds } = req.body;
 
   console.log("Saving rounds for event:", eventId);
   const client = await pool.connect();
   try {
-    await client.query('BEGIN');
+    await client.query("BEGIN");
 
     for (const round of rounds) {
-      const { name, category, sub_category, board_type, gender, age_category, heats } = round;
+      const {
+        name,
+        category,
+        sub_category,
+        board_type,
+        gender,
+        age_category,
+        heats,
+      } = round;
       console.log("Saving round:", name);
       const roundResult = await client.query(
-        'INSERT INTO rounds (event_id, round_name, category, sub_category, board_type, gender, age_category, round_date) VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP) RETURNING id',
-        [eventId, name, category, sub_category, board_type, gender, age_category]
+        "INSERT INTO rounds (event_id, round_name, category, sub_category, board_type, gender, age_category, round_date) VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP) RETURNING id",
+        [
+          eventId,
+          name,
+          category,
+          sub_category,
+          board_type,
+          gender,
+          age_category,
+        ]
       );
 
       const roundId = roundResult.rows[0].id;
@@ -321,7 +343,7 @@ router.post('/save-rounds', async (req, res) => {
       for (const heat of heats) {
         console.log("Saving heat:", heat.heat_name);
         const heatResult = await client.query(
-          'INSERT INTO heats (round_id, heat_name) VALUES ($1, $2) RETURNING id',
+          "INSERT INTO heats (round_id, heat_name) VALUES ($1, $2) RETURNING id",
           [roundId, heat.heat_name]
         );
 
@@ -331,40 +353,46 @@ router.post('/save-rounds', async (req, res) => {
         for (const competitor of heat.competitors) {
           console.log("Saving competitor:", competitor.id);
           await client.query(
-            'INSERT INTO heat_competitors (heat_id, competitor_id) VALUES ($1, $2)',
+            "INSERT INTO heat_competitors (heat_id, competitor_id) VALUES ($1, $2)",
             [heatId, competitor.id]
           );
         }
       }
     }
 
-    await client.query('COMMIT');
+    await client.query("COMMIT");
     console.log("All rounds and heats saved successfully");
-    res.status(200).json({ message: 'Rounds saved successfully' });
+    res.status(200).json({ message: "Rounds saved successfully" });
   } catch (error) {
-    await client.query('ROLLBACK');
-    console.error('Error saving rounds:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    await client.query("ROLLBACK");
+    console.error("Error saving rounds:", error);
+    res.status(500).json({ message: "Internal server error" });
   } finally {
     client.release();
   }
 });
 
 // Get all rounds for an event
-router.get('/get-rounds/:eventId', async (req, res) => {
+router.get("/get-rounds/:eventId", async (req, res) => {
   const { eventId } = req.params;
 
   try {
     // Fetch rounds
-    const roundsResult = await pool.query('SELECT * FROM rounds WHERE event_id = $1', [eventId]);
+    const roundsResult = await pool.query(
+      "SELECT * FROM rounds WHERE event_id = $1",
+      [eventId]
+    );
     const rounds = roundsResult.rows;
-    console.log('Fetched rounds:', rounds);
+    console.log("Fetched rounds:", rounds);
 
     for (const round of rounds) {
       // Fetch heats for each round
-      const heatsResult = await pool.query('SELECT * FROM heats WHERE round_id = $1', [round.id]);
+      const heatsResult = await pool.query(
+        "SELECT * FROM heats WHERE round_id = $1",
+        [round.id]
+      );
       const heats = heatsResult.rows;
-      console.log('Fetched heats for round', round.id, ':', heats);
+      console.log("Fetched heats for round", round.id, ":", heats);
 
       for (const heat of heats) {
         // Fetch competitors for each heat
@@ -372,20 +400,28 @@ router.get('/get-rounds/:eventId', async (req, res) => {
           `SELECT c.id, c.name 
            FROM competitors c
            JOIN heat_competitors hc ON hc.competitor_id = c.id
-           WHERE hc.heat_id = $1`, 
+           WHERE hc.heat_id = $1`,
           [heat.id]
         );
         heat.competitors = competitorsResult.rows;
-        console.log('Fetched competitors for heat', heat.id, ':', heat.competitors);
+        console.log(
+          "Fetched competitors for heat",
+          heat.id,
+          ":",
+          heat.competitors
+        );
       }
       round.heats = heats;
     }
 
-    console.log('Fetched rounds with details:', JSON.stringify(rounds, null, 2));
+    console.log(
+      "Fetched rounds with details:",
+      JSON.stringify(rounds, null, 2)
+    );
     res.status(200).json(rounds);
   } catch (error) {
-    console.error('Error fetching rounds:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error fetching rounds:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -454,32 +490,36 @@ router.post("/advance-competitors", async (req, res) => {
 });
 
 // Endpoint to generate PDF using saved rounds data
-router.post('/generate-rounds-pdf', async (req, res) => {
+router.post("/generate-rounds-pdf", async (req, res) => {
   const { eventId, rounds } = req.body;
 
   try {
     const doc = new PDFDocument();
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename=rounds.pdf');
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=rounds.pdf");
     doc.pipe(res);
 
-    doc.fontSize(20).text(`Rounds for Event ${eventId}`, { align: 'center' });
+    doc.fontSize(20).text(`Rounds for Event ${eventId}`, { align: "center" });
     doc.moveDown();
 
     for (const round of rounds) {
-      doc.fontSize(16).text(`Round: ${round.name}`, { align: 'left' });
-      doc.fontSize(12).text(`Category: ${round.category}`, { align: 'left' });
+      doc.fontSize(16).text(`Round: ${round.name}`, { align: "left" });
+      doc.fontSize(12).text(`Category: ${round.category}`, { align: "left" });
       //doc.fontSize(12).text(`Sub Category: ${round.sub_category}`, { align: 'left' });
       //doc.fontSize(12).text(`Board Type: ${round.board_type}`, { align: 'left' });
-      doc.fontSize(12).text(`Gender: ${round.gender}`, { align: 'left' });
-      doc.fontSize(12).text(`Age Category: ${round.age_category}`, { align: 'left' });
+      doc.fontSize(12).text(`Gender: ${round.gender}`, { align: "left" });
+      doc
+        .fontSize(12)
+        .text(`Age Category: ${round.age_category}`, { align: "left" });
       doc.moveDown();
 
       for (const heat of round.heats) {
-        doc.fontSize(14).text(`Heat: ${heat.name}`, { align: 'left' });
-        doc.fontSize(12).text(`Competitors:`, { align: 'left' });
+        doc.fontSize(14).text(`Heat: ${heat.name}`, { align: "left" });
+        doc.fontSize(12).text(`Competitors:`, { align: "left" });
         heat.competitors.forEach((competitor, idx) => {
-          doc.fontSize(12).text(`${idx + 1}. ${competitor.name}`, { align: 'left' });
+          doc
+            .fontSize(12)
+            .text(`${idx + 1}. ${competitor.name}`, { align: "left" });
         });
         doc.moveDown();
       }
@@ -487,8 +527,8 @@ router.post('/generate-rounds-pdf', async (req, res) => {
 
     doc.end();
   } catch (error) {
-    console.error('Error generating PDF:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error generating PDF:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -504,10 +544,10 @@ router.post('/generate-rounds-pdf', async (req, res) => {
 //     const rounds = roundsResult.rows;
 
 //     const heatsResult = await pool.query(
-//       `SELECT h.*, c.name AS competitor_name 
-//        FROM heats h 
-//        JOIN heat_competitors hc ON h.id = hc.heat_id 
-//        JOIN competitors c ON hc.competitor_id = c.id 
+//       `SELECT h.*, c.name AS competitor_name
+//        FROM heats h
+//        JOIN heat_competitors hc ON h.id = hc.heat_id
+//        JOIN competitors c ON hc.competitor_id = c.id
 //        WHERE h.round_id IN (SELECT id FROM rounds WHERE event_id = $1)`,
 //       [eventId]
 //     );
@@ -549,6 +589,4 @@ router.post('/generate-rounds-pdf', async (req, res) => {
 //   }
 // });
 
-
 export default router;
-

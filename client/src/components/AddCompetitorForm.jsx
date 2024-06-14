@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const categories = ["Shortboard", "Longboard"];
 const subCategories = ["Men", "Women"];
@@ -16,7 +17,11 @@ const ageCategories = [
   "+70",
 ];
 
-const AddCompetitorForm = ({ eventId, fetchCompetitors, selectedEventName }) => {
+const AddCompetitorForm = ({
+  eventId,
+  fetchCompetitors,
+  selectedEventName,
+}) => {
   const [competitorName, setCompetitorName] = useState("");
   const [category, setCategory] = useState(categories[0]);
   const [subCategory, setSubCategory] = useState(subCategories[0]);

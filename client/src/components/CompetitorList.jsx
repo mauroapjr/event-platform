@@ -1,7 +1,11 @@
 import React from "react";
 import CompetitorItem from "./CompetitorItem";
 
-const CompetitorsList = ({ competitors, selectedEventName, handleDeleteCompetitor }) => {
+const CompetitorsList = ({
+  competitors,
+  selectedEventName,
+  handleDeleteCompetitor,
+}) => {
   return (
     <>
       <h3>Existing Competitors</h3>
