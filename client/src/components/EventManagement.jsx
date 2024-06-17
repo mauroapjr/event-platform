@@ -3,11 +3,12 @@ import axios from "axios";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import EventsList from "./EventList";
-import CompetitorsList from "./CompetitorList";
+import CompetitorsList from "./CompetitorList"; 
 import AddCompetitorForm from "./AddCompetitorForm";
 import JudgesList from "./JudgesList";
 import AddJudgeForm from "./AddJudgeForm";
 import GeneratePDFButton from "./GeneratePDFButton";
+import RoundsDisplay from "./RoundsDisplay"; 
 
 const categories = ["Shortboard", "Longboard"];
 const subCategories = ["Men", "Women"];
@@ -35,6 +36,7 @@ const EventManagement = () => {
   const [date, setDate] = useState("");
   const [location, setLocation] = useState("");
   const [selectedEventName, setSelectedEventName] = useState("");
+  const [showRounds, setShowRounds] = useState(false); // State to manage visibility of RoundsDisplay
 
   useEffect(() => {
     fetchEvents();
@@ -279,7 +281,10 @@ const EventManagement = () => {
 
       <EventsList
         events={events}
-        fetchCompetitors={fetchCompetitors}
+        fetchCompetitors={(id, name) => {
+          setCompetitors([]); // Clear competitors before fetching new ones
+          fetchCompetitors(id, name);
+        }}
         fetchJudges={fetchJudges}
         handleDeleteEvent={handleDeleteEvent}
       />
@@ -317,6 +322,15 @@ const EventManagement = () => {
             Save Rounds
           </button>
           <GeneratePDFButton eventId={eventId} rounds={rounds} />
+
+          <Button
+            className="btn btn-info mt-3"
+            onClick={() => setShowRounds(!showRounds)}
+          >
+            {showRounds ? "Hide Saved Rounds" : "View Saved Rounds"}
+          </Button>
+
+          {showRounds && <RoundsDisplay eventId={eventId} />} {/* Conditionally render RoundsDisplay */}
 
           <DragDropContext onDragEnd={onDragEnd}>
             {rounds.map((round, roundIndex) => (
