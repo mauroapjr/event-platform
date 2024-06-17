@@ -282,7 +282,7 @@ const EventManagement = () => {
       <EventsList
         events={events}
         fetchCompetitors={(id, name) => {
-          setCompetitors([]); // Clear competitors before fetching new ones
+          setCompetitors([]); 
           fetchCompetitors(id, name);
         }}
         fetchJudges={fetchJudges}
@@ -330,7 +330,7 @@ const EventManagement = () => {
             {showRounds ? "Hide Saved Rounds" : "View Saved Rounds"}
           </Button>
 
-          {showRounds && <RoundsDisplay eventId={eventId} />} {/* Conditionally render RoundsDisplay */}
+          {showRounds && <RoundsDisplay eventId={eventId} />} 
 
           <DragDropContext onDragEnd={onDragEnd}>
             {rounds.map((round, roundIndex) => (

@@ -372,7 +372,7 @@ router.post("/save-rounds", async (req, res) => {
   }
 });
 
-// Get all rounds for an event
+
 router.get("/get-rounds/:eventId", async (req, res) => {
   const { eventId } = req.params;
 
@@ -424,6 +424,60 @@ router.get("/get-rounds/:eventId", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
+// // Get all rounds for an event
+// router.get("/get-rounds/:eventId", async (req, res) => {
+//   const { eventId } = req.params;
+
+//   try {
+//     // Fetch rounds
+//     const roundsResult = await pool.query(
+//       "SELECT * FROM rounds WHERE event_id = $1",
+//       [eventId]
+//     );
+//     const rounds = roundsResult.rows;
+//     console.log("Fetched rounds:", rounds);
+
+//     for (const round of rounds) {
+//       // Fetch heats for each round
+//       const heatsResult = await pool.query(
+//         "SELECT * FROM heats WHERE round_id = $1",
+//         [round.id]
+//       );
+//       const heats = heatsResult.rows;
+//       console.log("Fetched heats for round", round.id, ":", heats);
+
+//       for (const heat of heats) {
+//         // Fetch competitors for each heat
+//         const competitorsResult = await pool.query(
+//           `SELECT c.id, c.name 
+//            FROM competitors c
+//            JOIN heat_competitors hc ON hc.competitor_id = c.id
+//            WHERE hc.heat_id = $1`,
+//           [heat.id]
+//         );
+//         heat.competitors = competitorsResult.rows;
+//         console.log(
+//           "Fetched competitors for heat",
+//           heat.id,
+//           ":",
+//           heat.competitors
+//         );
+//       }
+//       round.heats = heats;
+//     }
+
+//     console.log(
+//       "Fetched rounds with details:",
+//       JSON.stringify(rounds, null, 2)
+//     );
+//     res.status(200).json(rounds);
+//   } catch (error) {
+//     console.error("Error fetching rounds:", error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// });
 
 // Add Score
 router.post("/add-score", async (req, res) => {
@@ -531,62 +585,5 @@ router.post("/generate-rounds-pdf", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
-// // Generate PDF
-// router.get('/generate-rounds-pdf/:eventId', async (req, res) => {
-//   const { eventId } = req.params;
-
-//   try {
-//     const roundsResult = await pool.query(
-//       'SELECT * FROM rounds WHERE event_id = $1',
-//       [eventId]
-//     );
-//     const rounds = roundsResult.rows;
-
-//     const heatsResult = await pool.query(
-//       `SELECT h.*, c.name AS competitor_name
-//        FROM heats h
-//        JOIN heat_competitors hc ON h.id = hc.heat_id
-//        JOIN competitors c ON hc.competitor_id = c.id
-//        WHERE h.round_id IN (SELECT id FROM rounds WHERE event_id = $1)`,
-//       [eventId]
-//     );
-//     const heats = heatsResult.rows;
-
-//     const doc = new PDFDocument();
-//     res.setHeader('Content-Type', 'application/pdf');
-//     res.setHeader('Content-Disposition', 'attachment; filename=rounds.pdf');
-//     doc.pipe(res);
-
-//     doc.fontSize(20).text(`Rounds for Event ${eventId}`, { align: 'center' });
-//     doc.moveDown();
-
-//     for (const round of rounds) {
-//       doc.fontSize(16).text(`Round ${round.id}`, { align: 'left' });
-//       doc.fontSize(12).text(`Category: ${round.category}`, { align: 'left' });
-//       doc.fontSize(12).text(`Sub Category: ${round.sub_category}`, { align: 'left' });
-//       doc.fontSize(12).text(`Board Type: ${round.board_type}`, { align: 'left' });
-//       doc.fontSize(12).text(`Gender: ${round.gender}`, { align: 'left' });
-//       doc.fontSize(12).text(`Age Category: ${round.age_category}`, { align: 'left' });
-//       doc.moveDown();
-
-//       const roundHeats = heats.filter(h => h.round_id === round.id);
-//       for (const heat of roundHeats) {
-//         doc.fontSize(14).text(`Heat ${heat.id}`, { align: 'left' });
-//         doc.fontSize(12).text(`Competitors:`, { align: 'left' });
-//         const competitors = heats.filter(h => h.heat_id === heat.id);
-//         competitors.forEach((comp, idx) => {
-//           doc.fontSize(12).text(`${idx + 1}. ${comp.competitor_name}`, { align: 'left' });
-//         });
-//         doc.moveDown();
-//       }
-//     }
-
-//     doc.end();
-//   } catch (error) {
-//     console.error('Error generating PDF:', error);
-//     res.status(500).json({ message: 'Internal server error' });
-//   }
-// });
 
 export default router;
