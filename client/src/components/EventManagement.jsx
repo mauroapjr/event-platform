@@ -3,12 +3,12 @@ import axios from "axios";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import EventsList from "./EventList";
-import CompetitorsList from "./CompetitorList"; 
+import CompetitorsList from "./CompetitorList";
 import AddCompetitorForm from "./AddCompetitorForm";
 import JudgesList from "./JudgesList";
 import AddJudgeForm from "./AddJudgeForm";
 import GeneratePDFButton from "./GeneratePDFButton";
-import RoundsDisplay from "./RoundsDisplay"; 
+import RoundsDisplay from "./RoundsDisplay";
 
 const categories = ["Shortboard", "Longboard"];
 const subCategories = ["Men", "Women"];
@@ -137,25 +137,37 @@ const EventManagement = () => {
 
   const handleSaveRounds = async () => {
     try {
-      await axios.post("http://localhost:3000/event-admin/save-rounds", {
-        eventId,
-        rounds: rounds.map((round) => ({
-          name: round.name,
-          category: round.category,
-          sub_category: round.sub_category,
-          board_type: round.board_type,
-          gender: round.gender,
-          age_category: round.age_category,
-          heats: round.heats.map((heat) => ({
-            heat_name: heat.name,
-            competitors: heat.competitors.map((competitor) => ({
-              id: competitor.id,
-              name: competitor.name,
-            })),
+      const roundsPayload = rounds.map((round) => ({
+        name: round.name,
+        category: round.category,
+        sub_category: round.sub_category,
+        board_type: round.board_type,
+        gender: round.gender,
+        age_category: round.age_category,
+        heats: round.heats.map((heat) => ({
+          id: heat.id,
+          heat_name: heat.name,
+          competitors: heat.competitors.map((competitor) => ({
+            id: competitor.id,
+            name: competitor.name,
           })),
         })),
-      });
+      }));
+
+      console.log("Rounds payload:", roundsPayload);
+
+      const response = await axios.post(
+        "http://localhost:3000/event-admin/save-rounds",
+        {
+          eventId,
+          rounds: roundsPayload,
+        }
+      );
+
       alert("Rounds saved successfully");
+
+      // Update the rounds state with the payload to avoid refetching
+      setRounds(roundsPayload);
     } catch (error) {
       console.error("Error saving rounds:", error);
       alert("Error saving rounds");
@@ -282,7 +294,7 @@ const EventManagement = () => {
       <EventsList
         events={events}
         fetchCompetitors={(id, name) => {
-          setCompetitors([]); 
+          setCompetitors([]);
           fetchCompetitors(id, name);
         }}
         fetchJudges={fetchJudges}
@@ -330,7 +342,7 @@ const EventManagement = () => {
             {showRounds ? "Hide Saved Rounds" : "View Saved Rounds"}
           </Button>
 
-          {showRounds && <RoundsDisplay eventId={eventId} />} 
+          {showRounds && <RoundsDisplay eventId={eventId} />}
 
           <DragDropContext onDragEnd={onDragEnd}>
             {rounds.map((round, roundIndex) => (

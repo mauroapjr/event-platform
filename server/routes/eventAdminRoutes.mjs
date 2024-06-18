@@ -372,7 +372,7 @@ router.post("/save-rounds", async (req, res) => {
   }
 });
 
-
+// Get all rounds for an event
 router.get("/get-rounds/:eventId", async (req, res) => {
   const { eventId } = req.params;
 
@@ -385,6 +385,7 @@ router.get("/get-rounds/:eventId", async (req, res) => {
     const rounds = roundsResult.rows;
     console.log("Fetched rounds:", rounds);
 
+    // Fetch heats and competitors for each round
     for (const round of rounds) {
       // Fetch heats for each round
       const heatsResult = await pool.query(
@@ -394,8 +395,8 @@ router.get("/get-rounds/:eventId", async (req, res) => {
       const heats = heatsResult.rows;
       console.log("Fetched heats for round", round.id, ":", heats);
 
+      // Fetch competitors for each heat
       for (const heat of heats) {
-        // Fetch competitors for each heat
         const competitorsResult = await pool.query(
           `SELECT c.id, c.name 
            FROM competitors c
@@ -425,7 +426,6 @@ router.get("/get-rounds/:eventId", async (req, res) => {
   }
 });
 
-
 // // Get all rounds for an event
 // router.get("/get-rounds/:eventId", async (req, res) => {
 //   const { eventId } = req.params;
@@ -451,7 +451,7 @@ router.get("/get-rounds/:eventId", async (req, res) => {
 //       for (const heat of heats) {
 //         // Fetch competitors for each heat
 //         const competitorsResult = await pool.query(
-//           `SELECT c.id, c.name 
+//           `SELECT c.id, c.name
 //            FROM competitors c
 //            JOIN heat_competitors hc ON hc.competitor_id = c.id
 //            WHERE hc.heat_id = $1`,
