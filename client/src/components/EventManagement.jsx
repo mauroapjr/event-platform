@@ -36,7 +36,7 @@ const EventManagement = () => {
   const [date, setDate] = useState("");
   const [location, setLocation] = useState("");
   const [selectedEventName, setSelectedEventName] = useState("");
-  const [showRounds, setShowRounds] = useState(false); // State to manage visibility of RoundsDisplay
+  const [showRounds, setShowRounds] = useState(false); 
 
   useEffect(() => {
     fetchEvents();
@@ -166,7 +166,7 @@ const EventManagement = () => {
 
       alert("Rounds saved successfully");
 
-      // Update the rounds state with the payload to avoid refetching
+      
       setRounds(roundsPayload);
     } catch (error) {
       console.error("Error saving rounds:", error);
