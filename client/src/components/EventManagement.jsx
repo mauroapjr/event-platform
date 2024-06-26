@@ -36,7 +36,7 @@ const EventManagement = () => {
   const [date, setDate] = useState("");
   const [location, setLocation] = useState("");
   const [selectedEventName, setSelectedEventName] = useState("");
-  const [showRounds, setShowRounds] = useState(false); 
+  const [showRounds, setShowRounds] = useState(false);
 
   useEffect(() => {
     fetchEvents();
@@ -146,7 +146,7 @@ const EventManagement = () => {
         age_category: round.age_category,
         heats: round.heats.map((heat) => ({
           id: heat.id,
-          heat_name: heat.name,
+          heat_name: heat.name, // Ensure heat_name is correctly set
           competitors: heat.competitors.map((competitor) => ({
             id: competitor.id,
             name: competitor.name,
@@ -166,7 +166,7 @@ const EventManagement = () => {
 
       alert("Rounds saved successfully");
 
-      
+      // Update rounds state with the saved payload
       setRounds(roundsPayload);
     } catch (error) {
       console.error("Error saving rounds:", error);
@@ -250,6 +250,8 @@ const EventManagement = () => {
     newRounds[destRoundIndex] = { ...destRound, heats: [...destRound.heats] };
 
     setRounds(newRounds);
+
+    console.log("Updated rounds after drag and drop:", newRounds);
   };
 
   return (
@@ -402,3 +404,4 @@ const EventManagement = () => {
 };
 
 export default EventManagement;
+
