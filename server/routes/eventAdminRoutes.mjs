@@ -426,6 +426,34 @@ router.get("/get-rounds/:eventId", async (req, res) => {
   }
 });
 
+// Fetch rounds and heats by event ID
+router.get("/get-specific-rounds/:eventId", async (req, res) => {
+  const { eventId } = req.params;
+  try {
+    const query = `
+      SELECT 
+        r.id as round_id, 
+        r.round_name, 
+        h.id as heat_id, 
+        h.heat_name, 
+        c.id as competitor_id, 
+        c.name as competitor_name 
+      FROM rounds r 
+      JOIN heats h ON r.id = h.round_id 
+      JOIN heat_competitors hc ON h.id = hc.heat_id 
+      JOIN competitors c ON hc.competitor_id = c.id 
+      WHERE r.event_id = $1 
+      ORDER BY r.id, h.id, c.id
+    `;
+    const result = await pool.query(query, [eventId]);
+    const roundsData = result.rows;
+    res.status(200).json(roundsData);
+  } catch (error) {
+    console.error("Error fetching specific rounds:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 // // Get all rounds for an event
 // router.get("/get-rounds/:eventId", async (req, res) => {
 //   const { eventId } = req.params;

@@ -5,31 +5,41 @@ const RoundsDisplay = ({ eventId }) => {
   const [rounds, setRounds] = useState([]);
 
   const fetchRounds = async () => {
-    const testEventId = 5;
     try {
       const response = await axios.get(
-        `http://localhost:3000/event-admin/get-rounds/${eventId}`
+        `http://localhost:3000/event-admin/get-specific-rounds/${eventId}`
       );
       const roundsData = response.data;
       console.log("Fetched rounds data:", roundsData);
 
-      const processedRounds = roundsData.map((round) => ({
-        id: round.id,
-        name: round.round_name,
-        category: round.category,
-        sub_category: round.sub_category,
-        board_type: round.board_type,
-        gender: round.gender,
-        age_category: round.age_category,
-        heats: (round.heats || []).map((heat) => ({
-          id: heat.id,
-          name: heat.heat_name,
-          competitors: (heat.competitors || []).map((competitor) => ({
-            id: competitor.id,
-            name: competitor.name,
-          })),
-        })),
-      }));
+      const processedRounds = [];
+
+      roundsData.forEach((row) => {
+        let round = processedRounds.find((r) => r.id === row.round_id);
+        if (!round) {
+          round = {
+            id: row.round_id,
+            name: row.round_name,
+            heats: [],
+          };
+          processedRounds.push(round);
+        }
+
+        let heat = round.heats.find((h) => h.id === row.heat_id);
+        if (!heat) {
+          heat = {
+            id: row.heat_id,
+            name: row.heat_name,
+            competitors: [],
+          };
+          round.heats.push(heat);
+        }
+
+        heat.competitors.push({
+          id: row.competitor_id,
+          name: row.competitor_name,
+        });
+      });
 
       console.log("Processed rounds:", processedRounds);
       setRounds(processedRounds);
