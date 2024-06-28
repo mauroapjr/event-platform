@@ -93,8 +93,3 @@ const RoundsDisplay = ({ eventId }) => {
 };
 
 export default RoundsDisplay;
-
-
-
-
-
