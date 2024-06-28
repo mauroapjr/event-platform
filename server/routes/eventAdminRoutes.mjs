@@ -313,6 +313,29 @@ router.post("/save-rounds", async (req, res) => {
   try {
     await client.query("BEGIN");
 
+    // Delete existing heats and heat competitors for the event
+    const existingRoundsResult = await client.query(
+      "SELECT id FROM rounds WHERE event_id = $1",
+      [eventId]
+    );
+    const existingRoundIds = existingRoundsResult.rows.map(row => row.id);
+
+    if (existingRoundIds.length > 0) {
+      await client.query(
+        "DELETE FROM heat_competitors WHERE heat_id IN (SELECT id FROM heats WHERE round_id = ANY($1::int[]))",
+        [existingRoundIds]
+      );
+      await client.query(
+        "DELETE FROM heats WHERE round_id = ANY($1::int[])",
+        [existingRoundIds]
+      );
+      await client.query(
+        "DELETE FROM rounds WHERE id = ANY($1::int[])",
+        [existingRoundIds]
+      );
+    }
+
+    // Insert new rounds and heats
     for (const round of rounds) {
       const {
         name,
@@ -371,6 +394,75 @@ router.post("/save-rounds", async (req, res) => {
     client.release();
   }
 });
+
+
+// // Save rounds and heats to the database
+// router.post("/save-rounds", async (req, res) => {
+//   const { eventId, rounds } = req.body;
+
+//   console.log("Saving rounds for event:", eventId);
+//   const client = await pool.connect();
+//   try {
+//     await client.query("BEGIN");
+
+//     for (const round of rounds) {
+//       const {
+//         name,
+//         category,
+//         sub_category,
+//         board_type,
+//         gender,
+//         age_category,
+//         heats,
+//       } = round;
+//       console.log("Saving round:", name);
+//       const roundResult = await client.query(
+//         "INSERT INTO rounds (event_id, round_name, category, sub_category, board_type, gender, age_category, round_date) VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP) RETURNING id",
+//         [
+//           eventId,
+//           name,
+//           category,
+//           sub_category,
+//           board_type,
+//           gender,
+//           age_category,
+//         ]
+//       );
+
+//       const roundId = roundResult.rows[0].id;
+//       console.log("Round saved with ID:", roundId);
+
+//       for (const heat of heats) {
+//         console.log("Saving heat:", heat.heat_name);
+//         const heatResult = await client.query(
+//           "INSERT INTO heats (round_id, heat_name) VALUES ($1, $2) RETURNING id",
+//           [roundId, heat.heat_name]
+//         );
+
+//         const heatId = heatResult.rows[0].id;
+//         console.log("Heat saved with ID:", heatId);
+
+//         for (const competitor of heat.competitors) {
+//           console.log("Saving competitor:", competitor.id);
+//           await client.query(
+//             "INSERT INTO heat_competitors (heat_id, competitor_id) VALUES ($1, $2)",
+//             [heatId, competitor.id]
+//           );
+//         }
+//       }
+//     }
+
+//     await client.query("COMMIT");
+//     console.log("All rounds and heats saved successfully");
+//     res.status(200).json({ message: "Rounds saved successfully" });
+//   } catch (error) {
+//     await client.query("ROLLBACK");
+//     console.error("Error saving rounds:", error);
+//     res.status(500).json({ message: "Internal server error" });
+//   } finally {
+//     client.release();
+//   }
+// });
 
 // Get all rounds for an event
 router.get("/get-rounds/:eventId", async (req, res) => {
